@@ -1,39 +1,58 @@
-@import "tailwindcss";
+/* Import Google Fonts */
 @import url("https://fonts.googleapis.com/css2?family=Archivo+Black&family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap");
-/* Reset default styles to ensure consistency across browsers */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+
+/* Tailwind and daisyUI imports */
+@import "tailwindcss";
+@plugin "daisyui";
+
+/* Custom DaisyUI theme definition */
+
+
+@plugin "daisyui/theme" {
+  name: "thnk";
+  default: false;
+  prefersdark: false;
+  color-scheme: "light";
+  --color-base-100: oklch(14% 0 0);
+  --color-base-200: oklch(14% 0.005 285.823);
+  --color-base-300: oklch(21% 0.006 56.043);
+  --color-base-content: oklch(92% 0.006 264.531);
+  --color-primary: oklch(65% 0.241 354.308);
+  --color-primary-content: oklch(93% 0.034 272.788);
+  --color-secondary: oklch(52% 0.223 3.958);
+  --color-secondary-content: oklch(94% 0.028 342.258);
+  --color-accent: oklch(90% 0.058 230.902);
+  --color-accent-content: oklch(20% 0 0);
+  --color-neutral: oklch(21% 0.006 285.885);
+  --color-neutral-content: oklch(92% 0.004 286.32);
+  --color-info: oklch(74% 0.16 232.661);
+  --color-info-content: oklch(29% 0.066 243.157);
+  --color-success: oklch(76% 0.177 163.223);
+  --color-success-content: oklch(37% 0.077 168.94);
+  --color-warning: oklch(82% 0.189 84.429);
+  --color-warning-content: oklch(41% 0.112 45.904);
+  --color-error: oklch(0.543 0.213 26.2);
+  --color-error-content: oklch(27% 0.105 12.094);
+  --radius-selector: 1rem;
+  --radius-field: 1rem;
+  --radius-box: 1rem;
+  --size-selector: 0.3125rem;
+  --size-field: 0.3125rem;
+  --border: 0.5px;
+  --depth: 1;
+  --noise: 1;
 }
 
-/* Set base font family while allowing easy override */
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-}
 
-/* Ensure body takes full viewport height and has no default margins */
-body {
+
+/* Global resets and styles */
+.app-container {
+  background-color: #0d0d0d;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.11) 2px, transparent 0);
+  background-size: 25px 25px;
+  background-position: -5px -5px;
+
+  /* Existing body resets */
   margin: 0;
   min-height: 100vh;
-}
-
-/* Remove default link styling */
-a {
-  text-decoration: none;
-  color: inherit;
-}
-
-/* Remove default button styling */
-button {
-  border: none;
-  background: none;
-  font-family: inherit;
-  cursor: pointer;
-}
-
-/* Remove default list styling */
-ul,
-ol {
-  list-style: none;
 }
