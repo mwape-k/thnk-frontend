@@ -1,5 +1,7 @@
 import React from "react";
-import { History } from "lucide-react";
+import { History, LogIn, LogOut } from "lucide-react";
+
+import "../components/component-styles/styles-navbar.css";
 
 function Navbar() {
   return (
@@ -28,16 +30,20 @@ function Navbar() {
             className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
           >
             <li>
-              <a>Homepage</a>
+              <a>
+                <History /> Homepage
+              </a>
             </li>
             <li>
-              <a>Login</a>
+              <a>
+                <LogIn /> Login
+              </a>
             </li>
           </ul>
         </div>
       </div>
       <div className="navbar-center">
-        <a className="btn btn-ghost text-xl">daisyUI</a>
+        <a className="btn btn-ghost text-xl navbar-title">THNK.</a>
       </div>
       <div className="navbar-end">
         <button className="btn btn-ghost btn-circle">
