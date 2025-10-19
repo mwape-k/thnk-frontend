@@ -1,21 +1,31 @@
-import React from 'react'
-
 interface buttonProps {
-  text?: string; 
+  text?: string;
   onClick?: () => void;
   className?: string;
-  type?: 'button' | 'submit' 
+  type?: "button" | "submit";
   isLoading?: boolean;
   size?: "full" | "large" | "medium" | "small" | "auto";
 }
 
-const CustomBtn: React.FC<buttonProps> = ({text = 'Button text', onClick, className = "", type= "button", isLoading = false, size = "full", }) => {
+const CustomBtn: React.FC<buttonProps> = ({
+  text = "Button text",
+  onClick,
+  className = "",
+  type = "button",
+  isLoading = false,
+  size = "full",
+}) => {
   return (
-    <button type={type} className={`custom-button custom-button--${size} ${className} ${
+    <button
+      type={type}
+      className={`btn btn-primary custom-button custom-button--${size} ${className} ${
         isLoading ? "custom-button--isLoading" : ""
       }`}
-      onClick={onClick}><span className="custom-button__text">{text}</span></button>
-  )
-}
+      onClick={onClick}
+    >
+      <span className="custom-button__text">{text}</span>
+    </button>
+  );
+};
 
-export default CustomBtn
+export default CustomBtn;

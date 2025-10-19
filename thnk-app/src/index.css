@@ -7,7 +7,6 @@
 
 /* Custom DaisyUI theme definition */
 
-
 @plugin "daisyui/theme" {
   name: "thnk";
   default: false;
@@ -33,9 +32,9 @@
   --color-warning-content: oklch(41% 0.112 45.904);
   --color-error: oklch(0.543 0.213 26.2);
   --color-error-content: oklch(27% 0.105 12.094);
-  --radius-selector: 1rem;
-  --radius-field: 1rem;
-  --radius-box: 1rem;
+  --radius-selector: 0.5rem;
+  --radius-field: 0.5rem;
+  --radius-box: 0.5rem;
   --size-selector: 0.3125rem;
   --size-field: 0.3125rem;
   --border: 0.5px;
@@ -43,12 +42,13 @@
   --noise: 1;
 }
 
-
-
 /* Global resets and styles */
 .app-container {
   background-color: #0d0d0d;
-  background-image: radial-gradient(rgba(255, 255, 255, 0.11) 2px, transparent 0);
+  background-image: radial-gradient(
+    rgba(255, 255, 255, 0.11) 2px,
+    transparent 0
+  );
   background-size: 25px 25px;
   background-position: -5px -5px;
 
