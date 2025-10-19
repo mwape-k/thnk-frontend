@@ -17,3 +17,7 @@
   position: relative;
   font-weight: 300;
 }
+
+.search-input > input:focus {
+  outline: none;
+}

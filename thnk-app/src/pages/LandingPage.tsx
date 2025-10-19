@@ -8,9 +8,7 @@ function LandingPage() {
   return (
     <div>
       <Navbar />
-      <CustomBtn type="button" size="large" text="Button button" />
       <Searchbar />
-      <AuthForm />
     </div>
   );
 }

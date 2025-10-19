@@ -1,0 +1,29 @@
+.form-container {
+  /* From https://css.glass */
+  background: rgba(255, 255, 255, 0);
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(8.9px);
+  -webkit-backdrop-filter: blur(8.9px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 2rem;
+  gap: 4rem;
+}
+
+.input-auth {
+  box-shadow: 0px 4px 4.1px rgba(0, 0, 0, 0.43);
+  border-radius: 12px;
+  background-color: #0d0d0d;
+}
+
+.input-auth:focus {
+  box-shadow: 0 0 0 2px #ff4da6;
+}
+
+.login-signup-btn {
+  width: 100%;
+}
+
+.custom-button__text {
+  font-weight: 500;
+}

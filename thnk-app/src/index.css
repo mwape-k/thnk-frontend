@@ -32,11 +32,11 @@
   --color-warning-content: oklch(41% 0.112 45.904);
   --color-error: oklch(0.543 0.213 26.2);
   --color-error-content: oklch(27% 0.105 12.094);
-  --radius-selector: 0.5rem;
-  --radius-field: 0.5rem;
-  --radius-box: 0.5rem;
-  --size-selector: 0.3125rem;
-  --size-field: 0.3125rem;
+  --radius-selector: 20rem;
+  --radius-field: 20rem;
+  --radius-box: 20rem;
+  --size-selector: 0.28rem;
+  --size-field: 0.28rem;
   --border: 0.5px;
   --depth: 1;
   --noise: 1;
