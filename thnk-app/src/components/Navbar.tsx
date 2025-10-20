@@ -1,5 +1,5 @@
 import React from "react";
-import { History, LogIn, LogOut } from "lucide-react";
+import { History, LogIn, LogOut, House } from "lucide-react";
 
 import "../components/component-styles/styles-navbar.css";
 
@@ -31,12 +31,12 @@ function Navbar() {
           >
             <li>
               <a>
-                <History /> Homepage
+                <House color="#ec4a7b" strokeWidth={1.5} size={20} /> Homepage
               </a>
             </li>
             <li>
               <a>
-                <LogIn /> Login
+                <LogIn color="#ec4a7b" strokeWidth={1.5} size={20} /> Login
               </a>
             </li>
           </ul>
@@ -47,7 +47,7 @@ function Navbar() {
       </div>
       <div className="navbar-end">
         <button className="btn btn-ghost btn-circle">
-          <History />
+          <History color="#ec4a7b" strokeWidth={1.5} size={28} />
         </button>
       </div>
     </div>
