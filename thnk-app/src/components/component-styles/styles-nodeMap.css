@@ -1,0 +1,10 @@
+.node-outer {
+  padding: 1rem;
+  border-radius: 900px;
+  border: 1px dashed white;
+  width: fit-content;
+  height: fit-content;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

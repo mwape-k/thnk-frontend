@@ -1,0 +1,68 @@
+.header-card {
+  width: 100%;
+  background-color: #ec4a7b;
+  padding: 0.2rem 0.4rem;
+  border-radius: 900px;
+}
+
+.header-card-inner {
+  width: 100%;
+  justify-content: space-between;
+}
+
+.summ-header-title {
+  width: 100%;
+  justify-self: center;
+  font-family: "Noto Sans", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  color: #0d0d0d;
+}
+
+.summ-card-cont {
+  width: 100%;
+  background: rgba(255, 255, 255, 0);
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 12px;
+  box-sizing: border-box;
+  gap: 10px;
+  text-align: left;
+  font-size: 16px;
+  color: #fff;
+}
+.summ-score {
+  font-family: "Noto Sans", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  padding: 0 2rem 0 2rem;
+}
+
+.neutrality-score {
+  border-bottom: 1px solid white;
+  padding-bottom: 0.4rem;
+}
+
+.modal-box {
+  border-radius: 8px;
+  height: 95vh;
+  min-width: 95vw;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 2rem;
+  /* From https://css.glass */
+  background: rgba(255, 255, 255, 0.034);
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.247);
+  backdrop-filter: blur(11.8px);
+  -webkit-backdrop-filter: blur(11.8px);
+  border: 1px solid rgba(255, 255, 255, 0.41);
+}
