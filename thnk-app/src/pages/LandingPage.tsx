@@ -10,11 +10,14 @@ import NodeMap from "../components/NodeMap";
 import MindMapContainer from "../components/MindMapContainer";
 
 function LandingPage() {
+  // Define a default value for userPromptOrUrl
+  const userPromptOrUrl = "a prompt";
+
   return (
     <div>
       <Navbar />
       <div className="flex grid-cols-1 m-12">
-        <MindMapContainer />
+        <MindMapContainer promptOrUrl={userPromptOrUrl} />
       </div>
     </div>
   );
