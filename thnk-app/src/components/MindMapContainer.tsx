@@ -13,67 +13,6 @@ const COLOURS = [
   "#D8D115",
 ];
 
-// Dummy async fetch function mimics API call with delay
-const fetchMindMapData = async (promptOrUrl: string) => {
-  await new Promise((res) => setTimeout(res, 250));
-  return [
-    {
-      id: "source-1",
-      label: "Source 1",
-      summary: "Summary for Source 1",
-      neutrality: "Neutral",
-      persuasion: "Low",
-      deeper: [
-        {
-          id: "deeper-1a",
-          label: "Related A",
-          summary: "Summary for Related A",
-          neutrality: "Neutral",
-          persuasion: "Medium",
-        },
-        {
-          id: "deeper-1b",
-          label: "Related B",
-          summary: "Summary for Related B",
-          neutrality: "Biased",
-          persuasion: "High",
-        },
-      ],
-    },
-    {
-      id: "source-2",
-      label: "Source 2",
-      summary: "Summary for Source 2",
-      neutrality: "Biased",
-      persuasion: "Medium",
-      deeper: [],
-    },
-    {
-      id: "source-3",
-      label: "Source 3",
-      summary: "Summary for Source 3",
-      neutrality: "Very Neutral",
-      persuasion: "Low",
-    },
-    {
-      id: "source-4",
-      label: "Source 4",
-      summary: "Summary for Source 4",
-      neutrality: "Persuasive",
-      persuasion: "Extreme",
-      deeper: [
-        {
-          id: "deeper-4a",
-          label: "Related D1",
-          summary: "Summary for D1",
-          neutrality: "Neutral",
-          persuasion: "Medium",
-        },
-      ],
-    },
-  ];
-};
-
 // Get a random position inside container (with margins to avoid edges)
 const getRandomPosition = (width: number, height: number) => {
   const margin = 60;
@@ -89,13 +28,19 @@ interface MindMapNode {
   fill: string;
   position: { x: number; y: number };
   summary?: string;
-  neutrality?: string;
-  persuasion?: string;
+  neutralityScore?: number;
+  persuasionScore?: number;
+  sentimentScore?: number;
+  tags?: string[];
+  url?: string;
+  sources?: string[];
   deeper?: MindMapNode[];
+  type?: "source" | "aiOutline" | "relatedSource";
 }
 
 interface MindMapContainerProps {
-  promptOrUrl?: string; // optional to accept preset nodes via location state
+  responseData?: any; // The API response data from search
+  searchType?: "url" | "prompt"; // Whether this is URL or prompt response
   width?: number;
   height?: number;
   initialNodes?: MindMapNode[]; // nodes passed from navigation for deeper page
@@ -104,7 +49,8 @@ interface MindMapContainerProps {
 }
 
 const MindMapContainer: React.FC<MindMapContainerProps> = ({
-  promptOrUrl = "",
+  responseData = null,
+  searchType = "prompt",
   width = 900,
   height = 500,
   initialNodes,
@@ -114,11 +60,94 @@ const MindMapContainer: React.FC<MindMapContainerProps> = ({
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Store nodes internally (either from initialNodes via navigation or fetched)
+  // Store nodes internally (either from initialNodes via navigation or from responseData)
   const [nodes, setNodes] = useState<MindMapNode[]>([]);
   const [popoverNode, setPopoverNode] = useState<MindMapNode | null>(null);
 
-  // On mount or prompt change, if no preset nodes, fetch data from dummy fetch
+  // Convert API response to mind map nodes
+  const convertResponseToNodes = (
+    data: any,
+    type: "url" | "prompt"
+  ): MindMapNode[] => {
+    if (!data) return [];
+
+    if (type === "url") {
+      // Handle URL response structure
+      const nodes: MindMapNode[] = [];
+
+      // Main content node
+      if (data.main) {
+        nodes.push({
+          id: "main-content",
+          label: data.main.title || "Main Content",
+          fill: COLOURS[0],
+          position: getRandomPosition(width, height),
+          summary: data.main.text,
+          neutralityScore: data.main.neutralityScore,
+          sentimentScore: data.main.sentimentScore,
+          tags: data.main.tags,
+          url: data.main.url,
+          type: "source",
+        });
+      }
+
+      // AI Outline nodes (deep dive summaries)
+      if (data.main?.aiOutline && Array.isArray(data.main.aiOutline)) {
+        data.main.aiOutline.forEach((outline: any, index: number) => {
+          nodes.push({
+            id: `ai-outline-${index}`,
+            label: `Summary ${index + 1}`,
+            fill: COLOURS[1],
+            position: getRandomPosition(width, height),
+            summary: outline.summary,
+            neutralityScore: outline.neutralityScore,
+            sources: outline.sources,
+            type: "aiOutline",
+          });
+        });
+      }
+
+      // Related sources
+      if (data.relatedSources && Array.isArray(data.relatedSources)) {
+        data.relatedSources.forEach((source: any, index: number) => {
+          nodes.push({
+            id: `related-source-${index}`,
+            label: source.title || `Source ${index + 1}`,
+            fill: COLOURS[2 + (index % (COLOURS.length - 2))],
+            position: getRandomPosition(width, height),
+            summary: source.text,
+            neutralityScore: source.neutralityScore,
+            sentimentScore: source.sentimentScore,
+            tags: source.tags,
+            url: source.url,
+            type: "relatedSource",
+          });
+        });
+      }
+
+      return nodes;
+    } else {
+      // Handle prompt response structure
+      if (data.sources && Array.isArray(data.sources)) {
+        return data.sources.map((source: any, index: number) => ({
+          id: `source-${index}`,
+          label: source.title || `Source ${index + 1}`,
+          fill: COLOURS[index % COLOURS.length],
+          position: getRandomPosition(width, height),
+          summary: source.text,
+          neutralityScore: source.neutralityScore,
+          sentimentScore: source.sentimentScore,
+          tags: source.tags,
+          url: source.url,
+          type: "source",
+        }));
+      }
+    }
+
+    return [];
+  };
+
+  // On mount or responseData change, convert API response to nodes
   useEffect(() => {
     if (initialNodes && initialNodes.length > 0) {
       // Use passed nodes directly for deeper views
@@ -135,84 +164,47 @@ const MindMapContainer: React.FC<MindMapContainerProps> = ({
       return;
     }
 
-    // Fetch dummy data
-    setPopoverNode(null);
-
-    fetchMindMapData(promptOrUrl).then((sources) => {
-      // Filter out duplicate labels on first level
-      const seenLabels = new Set();
-      const usedColours = new Set<string>();
-
-      const uniqueSources = sources.filter((source) => {
-        if (seenLabels.has(source.label)) {
-          return false;
-        } else {
-          seenLabels.add(source.label);
-          return true;
-        }
-      });
-
-      // Process only unique sources
-      const processedNodes = uniqueSources.map((node) => {
-        // Pick a unique colour for this node
-        let availableColours = COLOURS.filter((c) => !usedColours.has(c));
-        if (availableColours.length === 0) {
-          // If exhausted all colours, reset or pick random (here resets)
-          usedColours.clear();
-          availableColours = [...COLOURS];
-        }
-        const chosenColour =
-          availableColours[Math.floor(Math.random() * availableColours.length)];
-        usedColours.add(chosenColour);
-
-        return {
-          ...node,
-          fill: chosenColour,
-          position: getRandomPosition(width, height),
-          deeper: node.deeper
-            ? node.deeper.map((deepNode: any) => ({
-                ...deepNode,
-                fill: chosenColour, // inherit parent's fill colour
-                position: getRandomPosition(width, height),
-              }))
-            : [],
-        };
-      });
-
-      setNodes(processedNodes);
-    });
-  }, [promptOrUrl, width, height, initialNodes, parentFill]);
+    if (responseData) {
+      const convertedNodes = convertResponseToNodes(responseData, searchType);
+      setNodes(convertedNodes);
+      setPopoverNode(null);
+    }
+  }, [responseData, searchType, width, height, initialNodes, parentFill]);
 
   // Node click handler: navigates to deeper page or opens popover if leaf
   const handleNodeClick = (node: MindMapNode) => {
-    if (node.deeper && node.deeper.length > 0) {
-      // Nodes with deeper data: prepare nodes with parent fill colour and random positions
-      const scatteredChildren = node.deeper.map((deep) => ({
-        ...deep,
-        fill: node.fill,
-        position: getRandomPosition(width, height),
-      }));
+    // For now, all nodes show popover since we don't have deeper nested data
+    // You can modify this based on your actual data structure
+    setPopoverNode(node);
 
-      // Navigate passing children nodes, parent label and fill
-      navigate("/Search-deeper", {
-        state: {
-          nodes: scatteredChildren,
-          parentLabel: node.label,
-          fill: node.fill,
-        },
-      });
-    } else {
-      // Leaf nodes: show popover with the node info
-      setPopoverNode(node);
-    }
+    // If you want to implement deeper navigation later:
+    // if (node.sources && node.sources.length > 0) {
+    //   // Navigate to deeper view with sources
+    //   navigate("/Search-deeper", {
+    //     state: {
+    //       nodes: node.sources.map((source, index) => ({
+    //         id: `source-${index}`,
+    //         label: `Source ${index + 1}`,
+    //         fill: node.fill,
+    //         position: getRandomPosition(width, height),
+    //         url: source,
+    //         type: "source"
+    //       })),
+    //       parentLabel: node.label,
+    //       fill: node.fill,
+    //     },
+    //   });
+    // } else {
+    //   setPopoverNode(node);
+    // }
   };
 
   // Popover positioning relative to node position
   const popoverStyle = popoverNode
     ? {
         position: "absolute" as const,
-        left: popoverNode.position.x + 80,
-        top: popoverNode.position.y,
+        left: Math.min(popoverNode.position.x + 80, width - 300), // Keep within bounds
+        top: Math.min(popoverNode.position.y, height - 400), // Keep within bounds
         zIndex: 10,
       }
     : { display: "none" };
@@ -249,17 +241,24 @@ const MindMapContainer: React.FC<MindMapContainerProps> = ({
             onClick={() => handleNodeClick(node)}
           />
           <div
-            style={{ color: node.fill, textAlign: "center", fontWeight: 700 }}
+            style={{
+              color: node.fill,
+              textAlign: "center",
+              fontWeight: 700,
+              fontSize: "12px",
+              maxWidth: "100px",
+              wordWrap: "break-word",
+            }}
           >
             {node.label}
           </div>
         </div>
       ))}
 
-      {/* Show popover only for leaf nodes */}
+      {/* Show popover for clicked nodes */}
       {popoverNode && (
         <div style={popoverStyle}>
-          <PopoverCard onClose={closePopOver} />
+          <PopoverCard onClose={closePopOver} nodeData={popoverNode} />
         </div>
       )}
     </div>

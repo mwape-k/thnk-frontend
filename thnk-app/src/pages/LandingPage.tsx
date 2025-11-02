@@ -1,7 +1,35 @@
+import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Searchbar from "../components/Searchbar";
 
 function LandingPage() {
+  const navigate = useNavigate();
+
+  const handleSearchComplete = (data: any, searchType: "prompt" | "url") => {
+    console.log("Search completed:", data);
+
+    if (searchType === "url") {
+      console.log("Main content:", data.main);
+      console.log("AI Summary:", data.aiSummary);
+      console.log("Related sources:", data.relatedSources);
+    } else {
+      console.log("Summary:", data.summary);
+      console.log("Sources:", data.sources);
+    }
+
+    // Navigate to ResultsPage with search data
+    navigate("/Search-results", {
+      state: {
+        searchData: data,
+        searchType: searchType,
+      },
+    });
+  };
+
+  const handleSearchError = (error: string) => {
+    console.error("Search error:", error);
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -17,7 +45,10 @@ function LandingPage() {
 
         {/* Searchbar positioned lower but still centered */}
         <div className="w-full max-w-4xl mx-auto mb-16">
-          <Searchbar />
+          <Searchbar
+            onSearchComplete={handleSearchComplete}
+            onSearchError={handleSearchError}
+          />
         </div>
       </div>
     </div>

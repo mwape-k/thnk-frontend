@@ -4,15 +4,74 @@ import { Maximize2 } from "lucide-react";
 interface cardProps {
   onClick?: () => void;
   className?: string;
+  summaryText?: string;
+  neutralityScore?: number;
+  persuasionScore?: number;
+  modalTitle?: string;
+  modalContent?: string;
+  searchData?: any; // Add search data prop
+  searchType?: "url" | "prompt"; // Add search type prop
 }
 
-const SummmaryCard: React.FC<cardProps> = ({ onClick, className = "" }) => {
+const SummmaryCard: React.FC<cardProps> = ({
+  onClick,
+  className = "",
+  summaryText = "Lorem",
+  neutralityScore = 0.3,
+  persuasionScore = 0.6,
+  modalTitle = "Title",
+  modalContent = "Text",
+  searchData = null,
+  searchType = "prompt",
+}) => {
+  // Determine what to display based on search data and type
+  const getDisplayData = () => {
+    if (!searchData) {
+      return {
+        summary: summaryText,
+        neutrality: neutralityScore,
+        persuasion: persuasionScore,
+        title: modalTitle,
+        content: modalContent,
+      };
+    }
+
+    if (searchType === "url") {
+      // URL response structure
+      return {
+        summary:
+          searchData.aiSummary ||
+          searchData.main?.text ||
+          "No summary available",
+        neutrality:
+          searchData.neutralityScore || searchData.main?.neutralityScore || 0.5,
+        persuasion: searchData.persuasionScore || 0.5,
+        title: searchData.main?.title || "URL Analysis",
+        content:
+          searchData.main?.text ||
+          searchData.aiSummary ||
+          "No content available",
+      };
+    } else {
+      // Prompt response structure
+      return {
+        summary: searchData.summary || "No summary available",
+        neutrality: searchData.neutralityScore || 0.5,
+        persuasion: searchData.persuasionScore || 0.5,
+        title: "Research Summary",
+        content: searchData.summary || "No content available",
+      };
+    }
+  };
+
+  const displayData = getDisplayData();
+
   return (
     <div className={`p-6 ${className}`}>
       <div className="summ-card-cont flex grid-cols-2 gap-4">
         <div className="col-span-12 mb-4 header-card">
           <div className="flex w-full grid-cols-2 justify-center items-center text-center header-card-inner">
-            <h4 className="summ-header-title">You search result summary </h4>
+            <h4 className="summ-header-title">What THNK. found </h4>
             <span className="justify-end">
               <label
                 htmlFor="my_modal_6"
@@ -25,17 +84,16 @@ const SummmaryCard: React.FC<cardProps> = ({ onClick, className = "" }) => {
         </div>
         <div className="col-span-12 neutrality-score">
           <div className="flex grid-cols-2">
-            <h4 className="summ-score">Neutrality Score: </h4>
-            <h4 className="summ-score">Persuasion Score: </h4>
+            <h4 className="summ-score">
+              Neutrality: {displayData.neutrality.toFixed(2)}
+            </h4>
+            <h4 className="summ-score">
+              Persuasion: {displayData.persuasion.toFixed(2)}
+            </h4>
           </div>
         </div>
         <div className="col-span-12">
-          <p className="summ-summary">
-            Lorem ipsum, dolor sit amet consectetur adipisicing elit. Obcaecati
-            fugiat ratione dolore qui, a porro quod provident quis explicabo
-            officia. Alias placeat magni reprehenderit architecto corrupti ad
-            maxime soluta iusto?
-          </p>
+          <p className="summ-summary">{displayData.summary}</p>
         </div>
       </div>
 
@@ -50,13 +108,10 @@ const SummmaryCard: React.FC<cardProps> = ({ onClick, className = "" }) => {
       >
         <div className="modal-box">
           <h3 id="modal-title" className="text-lg font-bold">
-            Hello!
+            {displayData.title}
           </h3>
-          <p id="modal-desc" className="py-4">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Ullam
-            laborum, voluptatem quibusdam rerum in repudiandae recusandae
-            facilis laudantium et esse non quidem delectus temporibus quisquam
-            sequi, maiores id veritatis. Dolorum.
+          <p id="modal-desc" className="py-4 whitespace-pre-wrap">
+            {displayData.content}
           </p>
           <div className="modal-action">
             <label htmlFor="my_modal_6" className="btn cursor-pointer">

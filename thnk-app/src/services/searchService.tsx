@@ -13,14 +13,14 @@ export interface SearchResponse {
   message?: string;
 }
 
-const baseUrl: string = "http://localhost:3001/api";
+const baseUrl: string = "http://localhost:5000/api";
 
 // Separate function for prompt search
 export const searchByPrompt = async (
   prompt: string
 ): Promise<SearchResponse> => {
   try {
-    const response = await fetch(`${baseUrl}/search/prompt`, {
+    const response = await fetch(`${baseUrl}/prompt`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -52,7 +52,7 @@ export const searchByPrompt = async (
 // Separate function for URL search
 export const searchByUrl = async (url: string): Promise<SearchResponse> => {
   try {
-    const response = await fetch(`${baseUrl}/search/url`, {
+    const response = await fetch(`${baseUrl}/deeper-scrape`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
