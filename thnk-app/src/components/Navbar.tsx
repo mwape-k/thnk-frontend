@@ -1,16 +1,23 @@
 import { History, LogIn, LogOut, House } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import "../components/component-styles/styles-navbar.css";
+import { useNavigate } from "react-router-dom";
 
 function Navbar() {
   const { user, signOut } = useAuth();
+  const navigate = useNavigate();
 
   const handleLogout = async () => {
     try {
       await signOut();
+      navigate("/User-auth");
     } catch (error) {
       console.error("Failed to log out:", error);
     }
+  };
+
+  const handleHistoryNavigate = () => {
+    navigate("/User-history");
   };
 
   return (
@@ -72,9 +79,15 @@ function Navbar() {
         </a>
       </div>
       <div className="navbar-end">
-        <button className="btn btn-ghost btn-circle" aria-label="View history">
-          <History color="#ec4a7b" strokeWidth={1.5} size={28} />
-        </button>
+        {user ? (
+          <button
+            className="btn btn-ghost btn-circle"
+            aria-label="View history"
+            onClick={handleHistoryNavigate}
+          >
+            <History color="#ec4a7b" strokeWidth={1.5} size={28} />
+          </button>
+        ) : null}
       </div>
     </div>
   );
