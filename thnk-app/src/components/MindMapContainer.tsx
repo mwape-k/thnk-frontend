@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import NodeMap from "./NodeMap";
 import PopoverCard from "./PopoverCard";
@@ -13,14 +13,10 @@ const COLOURS = [
   "#D8D115",
 ];
 
-// Get a random position inside container (with margins to avoid edges)
-const getRandomPosition = (width: number, height: number) => {
-  const margin = 60;
-  return {
-    x: Math.random() * (width - margin * 2) + margin,
-    y: Math.random() * (height - margin * 2) + margin,
-  };
-};
+// More flexible node dimensions for collision detection
+const NODE_WIDTH = 100; // Approximate visual width
+const NODE_HEIGHT = 80; // Approximate visual height
+const NODE_MARGIN = 50; // Space between nodes
 
 interface MindMapNode {
   id: string;
@@ -39,127 +35,272 @@ interface MindMapNode {
 }
 
 interface MindMapContainerProps {
-  responseData?: any; // The API response data from search
-  searchType?: "url" | "prompt"; // Whether this is URL or prompt response
-  width?: number;
-  height?: number;
-  initialNodes?: MindMapNode[]; // nodes passed from navigation for deeper page
-  parentLabel?: string; // parent label from deeper page if any
-  parentFill?: string; // parent node fill colour to pass further down
+  responseData?: any;
+  searchType?: "url" | "prompt";
+  width?: number | "auto";
+  height?: number | "auto";
+  initialNodes?: MindMapNode[];
+  parentLabel?: string;
+  parentFill?: string;
+  className?: string;
 }
 
 const MindMapContainer: React.FC<MindMapContainerProps> = ({
   responseData = null,
   searchType = "prompt",
-  width = 900,
-  height = 500,
+  width = "auto",
+  height = "auto",
   initialNodes,
   parentLabel,
   parentFill,
+  className = "",
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  // Store nodes internally (either from initialNodes via navigation or from responseData)
+  const [containerSize, setContainerSize] = useState({
+    width: 900,
+    height: 500,
+  });
   const [nodes, setNodes] = useState<MindMapNode[]>([]);
   const [popoverNode, setPopoverNode] = useState<MindMapNode | null>(null);
 
-  // Convert API response to mind map nodes
-  const convertResponseToNodes = (
-    data: any,
-    type: "url" | "prompt"
-  ): MindMapNode[] => {
-    if (!data) return [];
+  // Update container size
+  useEffect(() => {
+    const updateSize = () => {
+      if (containerRef.current && (width === "auto" || height === "auto")) {
+        const { clientWidth, clientHeight } = containerRef.current;
+        setContainerSize({
+          width:
+            width === "auto" ? Math.max(clientWidth, 400) : (width as number), // Minimum width
+          height:
+            height === "auto"
+              ? Math.max(clientHeight, 300)
+              : (height as number), // Minimum height
+        });
+      } else {
+        setContainerSize({
+          width: width as number,
+          height: height as number,
+        });
+      }
+    };
 
-    if (type === "url") {
-      // Handle URL response structure
+    updateSize();
+    const resizeObserver = new ResizeObserver(updateSize);
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [width, height]);
+
+  const actualWidth = width === "auto" ? containerSize.width : width;
+  const actualHeight = height === "auto" ? containerSize.height : height;
+
+  // Check if two nodes overlap
+  const nodesOverlap = useCallback(
+    (node1: MindMapNode, node2: MindMapNode): boolean => {
+      const horizontalOverlap =
+        Math.abs(node1.position.x - node2.position.x) <
+        NODE_WIDTH + NODE_MARGIN;
+      const verticalOverlap =
+        Math.abs(node1.position.y - node2.position.y) <
+        NODE_HEIGHT + NODE_MARGIN;
+
+      return horizontalOverlap && verticalOverlap;
+    },
+    []
+  );
+
+  // Check if node is within container bounds
+  const isWithinBounds = useCallback(
+    (position: { x: number; y: number }): boolean => {
+      const margin = NODE_MARGIN;
+      return (
+        position.x >= margin &&
+        position.x <= actualWidth - NODE_WIDTH - margin &&
+        position.y >= margin &&
+        position.y <= actualHeight - NODE_HEIGHT - margin
+      );
+    },
+    [actualWidth, actualHeight]
+  );
+
+  // Generate a valid position that doesn't overlap with existing nodes and is within bounds
+  const getValidPosition = useCallback(
+    (existingNodes: MindMapNode[]): { x: number; y: number } => {
+      const margin = NODE_MARGIN;
+      const maxAttempts = 50; // Reduced attempts for performance
+
+      // If no existing nodes, return a random position
+      if (existingNodes.length === 0) {
+        return {
+          x: margin + Math.random() * (actualWidth - 2 * margin - NODE_WIDTH),
+          y: margin + Math.random() * (actualHeight - 2 * margin - NODE_HEIGHT),
+        };
+      }
+
+      for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        const position = {
+          x: margin + Math.random() * (actualWidth - 2 * margin - NODE_WIDTH),
+          y: margin + Math.random() * (actualHeight - 2 * margin - NODE_HEIGHT),
+        };
+
+        // Check if position is valid (within bounds and no overlaps)
+        if (isWithinBounds(position)) {
+          const overlaps = existingNodes.some((existingNode) =>
+            nodesOverlap({ ...existingNode, position }, existingNode)
+          );
+
+          if (!overlaps) {
+            return position;
+          }
+        }
+      }
+
+      // If no valid position found, use a simple spiral pattern from center
+      const centerX = actualWidth / 2;
+      const centerY = actualHeight / 2;
+
+      for (
+        let radius = 0;
+        radius < Math.min(actualWidth, actualHeight) / 2;
+        radius += NODE_MARGIN
+      ) {
+        for (let angle = 0; angle < 360; angle += 30) {
+          const rad = (angle * Math.PI) / 180;
+          const position = {
+            x: centerX + radius * Math.cos(rad) - NODE_WIDTH / 2,
+            y: centerY + radius * Math.sin(rad) - NODE_HEIGHT / 2,
+          };
+
+          if (isWithinBounds(position)) {
+            const overlaps = existingNodes.some((existingNode) =>
+              nodesOverlap({ ...existingNode, position }, existingNode)
+            );
+
+            if (!overlaps) {
+              return position;
+            }
+          }
+        }
+      }
+
+      // Ultimate fallback - use the center
+      return {
+        x: Math.max(margin, (actualWidth - NODE_WIDTH) / 2),
+        y: Math.max(margin, (actualHeight - NODE_HEIGHT) / 2),
+      };
+    },
+    [actualWidth, actualHeight, isWithinBounds, nodesOverlap]
+  );
+
+  // Convert API response to mind map nodes with valid positions
+  const convertResponseToNodes = useCallback(
+    (data: any, type: "url" | "prompt"): MindMapNode[] => {
+      if (!data) return [];
+
       const nodes: MindMapNode[] = [];
 
-      // Main content node
-      if (data.main) {
-        nodes.push({
-          id: "main-content",
-          label: data.main.title || "Main Content",
-          fill: COLOURS[0],
-          position: getRandomPosition(width, height),
-          summary: data.main.text,
-          neutralityScore: data.main.neutralityScore,
-          sentimentScore: data.main.sentimentScore,
-          tags: data.main.tags,
-          url: data.main.url,
-          type: "source",
-        });
-      }
-
-      // AI Outline nodes (deep dive summaries)
-      if (data.main?.aiOutline && Array.isArray(data.main.aiOutline)) {
-        data.main.aiOutline.forEach((outline: any, index: number) => {
+      if (type === "url") {
+        // Main content node
+        if (data.main) {
           nodes.push({
-            id: `ai-outline-${index}`,
-            label: `Summary ${index + 1}`,
-            fill: COLOURS[1],
-            position: getRandomPosition(width, height),
-            summary: outline.summary,
-            neutralityScore: outline.neutralityScore,
-            sources: outline.sources,
-            type: "aiOutline",
+            id: "main-content",
+            label: data.main.title || "Main Content",
+            fill: COLOURS[0],
+            position: getValidPosition(nodes),
+            summary: data.main.text,
+            neutralityScore: data.main.neutralityScore,
+            sentimentScore: data.main.sentimentScore,
+            tags: data.main.tags,
+            url: data.main.url,
+            type: "source",
           });
-        });
-      }
+        }
 
-      // Related sources
-      if (data.relatedSources && Array.isArray(data.relatedSources)) {
-        data.relatedSources.forEach((source: any, index: number) => {
-          nodes.push({
-            id: `related-source-${index}`,
-            label: source.title || `Source ${index + 1}`,
-            fill: COLOURS[2 + (index % (COLOURS.length - 2))],
-            position: getRandomPosition(width, height),
-            summary: source.text,
-            neutralityScore: source.neutralityScore,
-            sentimentScore: source.sentimentScore,
-            tags: source.tags,
-            url: source.url,
-            type: "relatedSource",
+        // AI Outline nodes
+        if (data.main?.aiOutline && Array.isArray(data.main.aiOutline)) {
+          data.main.aiOutline.forEach((outline: any, index: number) => {
+            nodes.push({
+              id: `ai-outline-${index}`,
+              label: `Summary ${index + 1}`,
+              fill: COLOURS[(index % (COLOURS.length - 1)) + 1],
+              position: getValidPosition(nodes),
+              summary: outline.summary,
+              neutralityScore: outline.neutralityScore,
+              sources: outline.sources,
+              type: "aiOutline",
+            });
           });
-        });
+        }
+
+        // Related sources
+        if (data.relatedSources && Array.isArray(data.relatedSources)) {
+          data.relatedSources.forEach((source: any, index: number) => {
+            nodes.push({
+              id: `related-source-${index}`,
+              label: source.title || `Source ${index + 1}`,
+              fill: COLOURS[(index + 2) % COLOURS.length],
+              position: getValidPosition(nodes),
+              summary: source.text,
+              neutralityScore: source.neutralityScore,
+              sentimentScore: source.sentimentScore,
+              tags: source.tags,
+              url: source.url,
+              type: "relatedSource",
+            });
+          });
+        }
+      } else {
+        // Prompt response structure
+        if (data.sources && Array.isArray(data.sources)) {
+          data.sources.forEach((source: any, index: number) => {
+            nodes.push({
+              id: `source-${index}`,
+              label: source.title || `Source ${index + 1}`,
+              fill: COLOURS[index % COLOURS.length],
+              position: getValidPosition(nodes),
+              summary: source.text,
+              neutralityScore: source.neutralityScore,
+              sentimentScore: source.sentimentScore,
+              tags: source.tags,
+              url: source.url,
+              type: "source",
+            });
+          });
+        }
       }
 
       return nodes;
-    } else {
-      // Handle prompt response structure
-      if (data.sources && Array.isArray(data.sources)) {
-        return data.sources.map((source: any, index: number) => ({
-          id: `source-${index}`,
-          label: source.title || `Source ${index + 1}`,
-          fill: COLOURS[index % COLOURS.length],
-          position: getRandomPosition(width, height),
-          summary: source.text,
-          neutralityScore: source.neutralityScore,
-          sentimentScore: source.sentimentScore,
-          tags: source.tags,
-          url: source.url,
-          type: "source",
-        }));
-      }
-    }
-
-    return [];
-  };
+    },
+    [getValidPosition]
+  );
 
   // On mount or responseData change, convert API response to nodes
   useEffect(() => {
     if (initialNodes && initialNodes.length > 0) {
-      // Use passed nodes directly for deeper views
-      const mapped = initialNodes.map((node) => ({
-        ...node,
-        fill:
-          parentFill ||
-          node.fill ||
-          COLOURS[Math.floor(Math.random() * COLOURS.length)],
-        position: node.position || getRandomPosition(width, height),
-      }));
-      setNodes(mapped);
+      // Ensure initial nodes have valid positions
+      const nodesWithValidPositions: MindMapNode[] = [];
+      initialNodes.forEach((node) => {
+        const validPosition = getValidPosition(nodesWithValidPositions);
+        nodesWithValidPositions.push({
+          ...node,
+          fill:
+            parentFill ||
+            node.fill ||
+            COLOURS[Math.floor(Math.random() * COLOURS.length)],
+          position:
+            node.position && isWithinBounds(node.position)
+              ? node.position
+              : validPosition,
+        });
+      });
+      setNodes(nodesWithValidPositions);
       setPopoverNode(null);
       return;
     }
@@ -168,61 +309,69 @@ const MindMapContainer: React.FC<MindMapContainerProps> = ({
       const convertedNodes = convertResponseToNodes(responseData, searchType);
       setNodes(convertedNodes);
       setPopoverNode(null);
+    } else {
+      // If no response data, set empty nodes to clear previous state
+      setNodes([]);
     }
-  }, [responseData, searchType, width, height, initialNodes, parentFill]);
+  }, [
+    responseData,
+    searchType,
+    initialNodes,
+    parentFill,
+    convertResponseToNodes,
+    getValidPosition,
+    isWithinBounds,
+  ]);
 
-  // Node click handler: navigates to deeper page or opens popover if leaf
+  // Debug: Log nodes when they change
+  useEffect(() => {
+    console.log("Nodes updated:", nodes.length, nodes);
+  }, [nodes]);
+
+  // Node click handler
   const handleNodeClick = (node: MindMapNode) => {
-    // For now, all nodes show popover since we don't have deeper nested data
-    // You can modify this based on your actual data structure
     setPopoverNode(node);
-
-    // If you want to implement deeper navigation later:
-    // if (node.sources && node.sources.length > 0) {
-    //   // Navigate to deeper view with sources
-    //   navigate("/Search-deeper", {
-    //     state: {
-    //       nodes: node.sources.map((source, index) => ({
-    //         id: `source-${index}`,
-    //         label: `Source ${index + 1}`,
-    //         fill: node.fill,
-    //         position: getRandomPosition(width, height),
-    //         url: source,
-    //         type: "source"
-    //       })),
-    //       parentLabel: node.label,
-    //       fill: node.fill,
-    //     },
-    //   });
-    // } else {
-    //   setPopoverNode(node);
-    // }
   };
 
-  // Popover positioning relative to node position
+  // Popover positioning with boundary checks
   const popoverStyle = popoverNode
     ? {
         position: "absolute" as const,
-        left: Math.min(popoverNode.position.x + 80, width - 300), // Keep within bounds
-        top: Math.min(popoverNode.position.y, height - 400), // Keep within bounds
+        left: Math.max(
+          NODE_MARGIN,
+          Math.min(popoverNode.position.x + 80, actualWidth - 320)
+        ),
+        top: Math.max(
+          NODE_MARGIN,
+          Math.min(popoverNode.position.y, actualHeight - 400)
+        ),
         zIndex: 10,
       }
     : { display: "none" };
 
-  // Function to close popover
   const closePopOver = () => setPopoverNode(null);
+
+  const containerStyle = {
+    width: width === "auto" ? "100%" : width,
+    height: height === "auto" ? "100%" : height,
+    minWidth: width === "auto" ? "400px" : width, // Ensure minimum width
+    minHeight: height === "auto" ? "450px" : height, // Ensure minimum height
+    position: "relative" as const,
+  };
 
   return (
     <div
-      className="relative"
-      style={{
-        width,
-        height,
-        minWidth: width,
-        minHeight: height,
-        borderRadius: 30,
-      }}
+      ref={containerRef}
+      className={`relative ${className}`}
+      style={containerStyle}
     >
+      {/* Debug info */}
+      {nodes.length === 0 && (
+        <div className="absolute inset-0 flex items-center justify-center text-gray-300">
+          No nodes to display
+        </div>
+      )}
+
       {/* Scatter nodes */}
       {nodes.map((node) => (
         <div
@@ -233,6 +382,10 @@ const MindMapContainer: React.FC<MindMapContainerProps> = ({
             top: node.position.y,
             zIndex: 3,
             cursor: "pointer",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
           <NodeMap
@@ -246,8 +399,10 @@ const MindMapContainer: React.FC<MindMapContainerProps> = ({
               textAlign: "center",
               fontWeight: 700,
               fontSize: "12px",
-              maxWidth: "100px",
+              maxWidth: "120px",
               wordWrap: "break-word",
+              marginTop: "8px",
+              padding: "2px 6px",
             }}
           >
             {node.label}

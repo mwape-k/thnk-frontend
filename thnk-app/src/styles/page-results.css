@@ -1,0 +1,13 @@
+.top-bar-actions {
+  margin-left: 1rem;
+  margin-right: 1rem;
+}
+
+.mind-map-cont {
+  margin: 0;
+  width: 100%;
+  min-height: 500px;
+}
+.actual-mind-map {
+  height: 500px;
+}

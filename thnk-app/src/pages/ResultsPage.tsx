@@ -6,6 +6,8 @@ import MindMapContainer from "../components/MindMapContainer";
 import { useState, useEffect } from "react";
 import CustomBtn from "../components/CustomBtn";
 
+import "../styles/page-results.css";
+
 function ResultsPage() {
   const location = useLocation();
   const [searchData, setSearchData] = useState(null);
@@ -48,7 +50,7 @@ function ResultsPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <div className="flex justify-between gap-2">
+      <div className="flex justify-between gap-2 top-bar-actions col-span-full">
         <CustomBtn
           size="auto"
           type="button"
@@ -57,12 +59,11 @@ function ResultsPage() {
         />
       </div>
       <div className="flex-1 flex flex-col items-center justify-between px-4">
-        <div className="text-center max-w-2xl mx-auto mb-12">
+        <div className="text-center mx-auto mind-map-cont">
           <MindMapContainer
             responseData={searchData}
             searchType={searchType}
-            width={1000}
-            height={600}
+            className="actual-mind-map"
           />
         </div>
 

@@ -129,7 +129,7 @@ function UserHistoryPage() {
               <p className="text-red-400 font-medium">{error}</p>
               <button
                 onClick={fetchHistory}
-                className="btn btn-accent text-red-400 underline text-sm mt-1"
+                className="btn btn-tertiary text-red-400  text-sm mt-1"
                 type="button"
               >
                 Try again

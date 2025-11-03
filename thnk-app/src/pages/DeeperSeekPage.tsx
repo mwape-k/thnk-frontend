@@ -1,11 +1,13 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import MindMapContainer from "../components/MindMapContainer";
 import Navbar from "../components/Navbar";
 import CustomBtn from "../components/CustomBtn";
+
+import "../styles/page-seek-deeper.css";
 
 export default function DeeperSeekPage() {
   const { state } = useLocation();
   const navigate = useNavigate();
+
   // Extract nodes (deeper level), label, and fill color from navigation state
   const nodes = state?.nodes || [];
   const parentLabel = state?.parentLabel || "Deeper Seek";
@@ -13,6 +15,10 @@ export default function DeeperSeekPage() {
 
   const handleRedirect = () => {
     navigate(-1); // Go back to previous history page
+  };
+
+  const handleOpenURL = () => {
+    navigate("_blank/");
   };
 
   return (
@@ -28,18 +34,17 @@ export default function DeeperSeekPage() {
         <div className="flex justify-center text-center">
           <h2>{parentLabel}</h2>
         </div>
+        <div className="node-breakdown">
+          <h1 className="node-title">{/*node title*/}</h1>
+          <p className="node-sumamry">{/*node summary*/}</p>
+          <CustomBtn
+            text="go to source"
+            type="button"
+            size="auto"
+            onClick={handleOpenURL}
+          />
+        </div>
       </div>
-      {/* Render MindMapContainer with the deeper node data and inherited fill color */}
-      <MindMapContainer
-        initialNodes={nodes}
-        parentLabel={parentLabel}
-        parentFill={fill}
-        width={900}
-        height={500}
-        // promptOrUrl intentionally empty since data is passed directly
-        promptOrUrl=""
-        key={parentLabel} // force remount if parentLabel changes
-      />
     </div>
   );
 }
