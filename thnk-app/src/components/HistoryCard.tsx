@@ -1,26 +1,117 @@
 import "../components/component-styles/styles-historyCard.css";
-
 import Node from "../assets/node.svg";
+import { Eye, Trash } from "lucide-react";
+import type { SearchHistory } from "../interface/history";
 
-function HistoryCard() {
+interface HistoryCardProps {
+  history: SearchHistory;
+  onView: (historyId: string) => void;
+  onDelete: (historyId: string) => void;
+  isLoading?: boolean;
+}
+
+function HistoryCard({
+  history,
+  onView,
+  onDelete,
+  isLoading = false,
+}: HistoryCardProps) {
+  const { _id, query, timestamp, resultSummary } = history;
+
+  // Format date
+  const formattedDate = new Date(timestamp).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  if (isLoading) {
+    return (
+      <div className="history-outer flex grid-cols-3 gap-4 p-0 justify-center items-center w-full animate-pulse">
+        <div className="node-cont">
+          <div className="node-history bg-gray-300 rounded-full w-12 h-12"></div>
+        </div>
+        <div className="history-card col-span-8 p-6 flex-1">
+          <div className="history-card-cont flex grid-cols-2 gap-4">
+            <div className="col-span-4">
+              <div className="history-score h-4 bg-gray-300 rounded mb-2"></div>
+              <div className="history-score h-4 bg-gray-300 rounded"></div>
+            </div>
+            <div className="col-span-8">
+              <div className="node-summary h-16 bg-gray-300 rounded"></div>
+            </div>
+          </div>
+        </div>
+        <div className="actions col-span-2 p-2">
+          <div className="flex grid-cols-2 gap-2">
+            <div className="col">
+              <button className="btn-secondary opacity-50" disabled>
+                <Trash />
+              </button>
+            </div>
+            <div className="col">
+              <button className="btn-secondary opacity-50" disabled>
+                <Eye />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="history-outer flex grid-cols-2 gap-4 p-0 justify-center items-center w-full">
+    <div className="history-outer flex grid-cols-3 gap-4 p-0 justify-center items-center w-full">
       <div className="node-cont">
         <img src={Node} alt="Node" className="node-history" />
       </div>
-      <div className="history-card col-span-10 p-6">
+      <div className="history-card col-span-8 p-6 flex-1">
         <div className="history-card-cont flex grid-cols-2 gap-4">
           <div className="col-span-4">
-            <h4 className="history-score">Neutrality Score: </h4>
-            <h4 className="history-score">Persuasion Score: </h4>
+            <h4 className="history-score">
+              Neutrality: {resultSummary?.neutralityScore?.toFixed(2) || "N/A"}
+            </h4>
+            <h4 className="history-score">
+              Persuasion: {resultSummary?.persuasionScore?.toFixed(2) || "N/A"}
+            </h4>
+            <p className="text-xs text-slate-500 mt-2">{formattedDate}</p>
+            <p className="text-xs text-pink-300 truncate" title={query}>
+              {query}
+            </p>
           </div>
           <div className="col-span-8">
             <p className="node-summary">
-              Lorem ipsum, dolor sit amet consectetur adipisicing elit.
-              Obcaecati fugiat ratione dolore qui, a porro quod provident quis
-              explicabo officia. Alias placeat magni reprehenderit architecto
-              corrupti ad maxime soluta iusto?
+              {resultSummary?.summary || "No summary available"}
             </p>
+            <div className="mt-2 flex items-center text-sm text-gray-600">
+              <span className="bg-blue-100 text-slate-800 px-2 py-1 rounded text-xs">
+                {resultSummary?.sourcesCount || 0} sources
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="actions col-span-2 p-2">
+        <div className="flex grid-cols-2 gap-2">
+          <div className="col">
+            <button
+              className="btn btn-tertiary hover:bg-red-100 hover:text-red-400 transition-colors"
+              onClick={() => onDelete(_id)}
+              title="Delete this search"
+            >
+              <Trash size={18} />
+            </button>
+          </div>
+          <div className="col">
+            <button
+              className="btn btn-tertiary hover:bg-blue-100 hover:text-blue-600 transition-colors"
+              onClick={() => onView(_id)}
+              title="View full analysis"
+            >
+              <Eye size={18} />
+            </button>
           </div>
         </div>
       </div>

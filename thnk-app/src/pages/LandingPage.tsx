@@ -2,6 +2,8 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Searchbar from "../components/Searchbar";
 
+import "../styles/page-landing.css";
+
 function LandingPage() {
   const navigate = useNavigate();
 
@@ -35,8 +37,8 @@ function LandingPage() {
       <Navbar />
 
       <div className="flex-1 flex flex-col items-center justify-between px-4">
-        <div className="text-center max-w-2xl mx-auto mb-12">
-          <h1 className="text-4xl font-bold mt-16">Welcome to THNK</h1>
+        <div className="text-center max-w-2xl mx-auto mb-12 title-card mt-16">
+          <h1 className="text-4xl font-bold">Welcome to THNK</h1>
           <p className="pt-3 text-gray-300">
             THNK is an interactive research tool that helps you find sources or
             understand topics in a neutral and unbiased way

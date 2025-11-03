@@ -1,4 +1,5 @@
-// Define types for the API requests and responses
+import { API_CONFIG } from "../config/api";
+
 export interface PromptSearchRequest {
   prompt: string;
 }
