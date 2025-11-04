@@ -21,7 +21,7 @@ function Navbar() {
   };
 
   return (
-    <div className="navbar">
+    <div className="navbar z-10">
       <div className="navbar-start">
         <div className="dropdown">
           <div
