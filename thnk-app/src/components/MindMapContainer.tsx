@@ -209,7 +209,7 @@ const MindMapContainer: React.FC<MindMapContainerProps> = ({
   const convertResponseToNodes = useCallback(
     (
       data: EnhancedSearchResponse | null,
-      _type: "url" | "prompt"
+      type: "url" | "prompt"
     ): MindMapNode[] => {
       if (!data) return [];
 
