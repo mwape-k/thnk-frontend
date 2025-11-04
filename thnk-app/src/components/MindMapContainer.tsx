@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+//import { useNavigate, useLocation } from "react-router-dom";
 import NodeMap from "./NodeMap";
 import PopoverCard from "./PopoverCard";
 import type { EnhancedSearchResponse } from "../services/searchService";
@@ -209,7 +209,7 @@ const MindMapContainer: React.FC<MindMapContainerProps> = ({
   const convertResponseToNodes = useCallback(
     (
       data: EnhancedSearchResponse | null,
-      type: "url" | "prompt"
+      _type: "url" | "prompt"
     ): MindMapNode[] => {
       if (!data) return [];
 
