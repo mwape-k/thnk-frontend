@@ -8,6 +8,7 @@ import { Trash2, RefreshCw, AlertCircle } from "lucide-react";
 import type { SearchHistory } from "../interface/history";
 
 import "../styles/page-history.css";
+import PixelBlast from "@/components/PixelBlast/PixelBlast";
 
 function UserHistoryPage() {
   const [history, setHistory] = useState<SearchHistory[]>([]);
@@ -136,7 +137,7 @@ function UserHistoryPage() {
     <div className="min-h-screen">
       <Navbar />
 
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="container mx-auto px-4 py-8 max-w-4xl ">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl">Search History</h1>
           <div className="flex gap-2">

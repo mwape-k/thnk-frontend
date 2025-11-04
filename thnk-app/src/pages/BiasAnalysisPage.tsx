@@ -9,6 +9,13 @@ import type {
   ReactPortal,
   Key,
 } from "react";
+import {
+  AlertCircle,
+  AlertTriangle,
+  CheckCircle2,
+  Lightbulb,
+} from "lucide-react";
+import PixelBlast from "@/components/PixelBlast/PixelBlast";
 
 export default function BiasAnalysisPage() {
   const { state } = useLocation();
@@ -62,7 +69,7 @@ export default function BiasAnalysisPage() {
     <div className="min-h-screen">
       <Navbar />
 
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="container mx-auto px-4 py-8 max-w-4xl z-10">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <CustomBtn
@@ -93,7 +100,9 @@ export default function BiasAnalysisPage() {
         {quickAssessment && (
           <div className="card info-card shadow-xl mb-6">
             <div className="card-body">
-              <h2 className="card-title text-2xl">Quick Assessment</h2>
+              <h2 className="card-cust-title card-title text-2xl">
+                Quick Assessment
+              </h2>
 
               <div className="stats stats-vertical lg:stats-horizontal shadow w-full">
                 <div className="stat place-items-center">
@@ -138,19 +147,7 @@ export default function BiasAnalysisPage() {
               </div>
 
               <div className="alert alert-info mt-4">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  className="stroke-current shrink-0 w-6 h-6"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  ></path>
-                </svg>
+                <AlertCircle />
                 <span>{quickAssessment.keyConsideration}</span>
               </div>
             </div>
@@ -161,7 +158,9 @@ export default function BiasAnalysisPage() {
         {biasAnalysis && (
           <div className="card info-card shadow-xl mb-6">
             <div className="card-body">
-              <h2 className="card-title text-2xl">Bias Analysis</h2>
+              <h2 className="card-cust-title card-title text-2xl">
+                Bias Analysis
+              </h2>
 
               <div className="space-y-6">
                 {/* Overall Assessment */}
@@ -209,9 +208,16 @@ export default function BiasAnalysisPage() {
                               | undefined,
                             index: Key | null | undefined
                           ) => (
-                            <li key={index} className="flex items-start gap-2">
-                              <div className="badge badge-primary badge-sm mt-1">
-                                ✓
+                            <li
+                              key={index}
+                              className="flex items-start gap-2 pb-8 items-center "
+                            >
+                              <div className="badge badge-primary badge-sm p-0 mt-0 w-9 h-9 flex items-center">
+                                <CheckCircle2
+                                  size={54}
+                                  strokeWidth={2}
+                                  className="m-1.5"
+                                />
                               </div>
                               <span className="text-base-content/80">
                                 {finding}
@@ -263,20 +269,12 @@ export default function BiasAnalysisPage() {
                             index: Key | null | undefined
                           ) => (
                             <div key={index} className="alert alert-warning">
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="stroke-current shrink-0 h-6 w-6"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth="2"
-                                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z"
-                                />
-                              </svg>
-                              <span>{question}</span>
+                              <AlertTriangle
+                                size={26}
+                                strokeWidth={2}
+                                className="m-1.5"
+                              />
+                              <span className="question-text">{question}</span>
                             </div>
                           )
                         )}
@@ -321,11 +319,14 @@ export default function BiasAnalysisPage() {
                               | undefined,
                             index: Key | null | undefined
                           ) => (
-                            <div key={index} className="flex items-start gap-2">
-                              <div className="badge badge-accent badge-sm mt-1">
-                                💡
+                            <div
+                              key={index}
+                              className="flex items-start gap-4 pb-5"
+                            >
+                              <div className="badge badge-accent badge-sm mt-0 w-10 h-10">
+                                <Lightbulb />
                               </div>
-                              <span className="text-base-content/80">
+                              <span className="text-base-content/90 font-bold">
                                 {suggestion}
                               </span>
                             </div>
@@ -343,7 +344,9 @@ export default function BiasAnalysisPage() {
         {sourceMetrics && (
           <div className="card info-card shadow-xl mb-6">
             <div className="card-body">
-              <h2 className="card-title text-2xl">Source Analysis</h2>
+              <h2 className="card-cust-title card-title text-2xl">
+                Source Analysis
+              </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
@@ -426,7 +429,9 @@ export default function BiasAnalysisPage() {
         {researchQuality && (
           <div className="card info-card shadow-xl">
             <div className="card-body">
-              <h2 className="card-title text-2xl">Research Quality</h2>
+              <h2 className="card-cust-title card-title text-2xl">
+                Research Quality
+              </h2>
 
               <div className="flex items-center gap-6 mb-6">
                 <div className="flex-1">

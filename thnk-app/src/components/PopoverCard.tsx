@@ -1,6 +1,6 @@
 import CustomBtn from "./CustomBtn";
 import "../components/component-styles/styles-popOver.css";
-import { ArrowUpRight, Expand, X } from "lucide-react";
+import { ArrowUpRight, Expand, ExternalLink, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface cardProps {
@@ -127,7 +127,7 @@ const PopoverCard: React.FC<PopoverCardProps> = ({
                   onClick={handleSourceOpen}
                   title="Open source"
                 >
-                  <ArrowUpRight size={16} />
+                  <ExternalLink size={16} />
                 </button>
               )}
             </div>

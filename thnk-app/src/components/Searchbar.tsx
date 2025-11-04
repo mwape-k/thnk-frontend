@@ -108,9 +108,9 @@ export default function Searchbar({
         />
       </label>
 
-      <div className="text-sm text-gray-400">
+      <div className="text-sm text-gray-400 badge  badge-lg badge-tertiary">
         Searching by:{" "}
-        <span className="text-pink-400">
+        <span className="text-accent">
           {searchType === "prompt" ? "Question" : "URL"}
         </span>
       </div>

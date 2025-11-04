@@ -4,6 +4,9 @@ import Searchbar from "../components/Searchbar";
 import type { EnhancedSearchResponse } from "@/services/searchService";
 
 import "../styles/page-landing.css";
+import DitherBackground from "@/components/DitherBackground";
+import DarkVeil from "@/components/DarkVeil/DarkVeil";
+import PixelBlast from "@/components/PixelBlast/PixelBlast";
 
 function LandingPage() {
   const navigate = useNavigate();
@@ -60,9 +63,26 @@ function LandingPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <div className="absolute h-dvh inset-0 z-0">
+        <PixelBlast
+          variant="circle"
+          pixelSize={2.5}
+          color="#FFF"
+          patternScale={1.9}
+          patternDensity={1}
+          pixelSizeJitter={0.7}
+          enableRipples
+          rippleSpeed={0.75}
+          rippleThickness={0.12}
+          rippleIntensityScale={1.2}
+          speed={0.6}
+          edgeFade={0.15}
+          transparent
+        />
+      </div>
       <Navbar />
 
-      <div className="flex-1 flex flex-col items-center justify-between px-4">
+      <div className="flex-1 flex flex-col items-center justify-between px-4 z-5">
         <div className="text-center max-w-2xl mx-auto mb-12 title-card mt-16">
           <h1 className="text-4xl font-bold">Welcome to THNK</h1>
           <p className="pt-3 text-gray-300">

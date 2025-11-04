@@ -85,8 +85,8 @@ const SummmaryCard: React.FC<cardProps> = ({
 
         {/* Enhanced Quick Assessment */}
         {displayData.quickAssessment && (
-          <div className="col-span-12 text-center items-center justify-center">
-            <div className="flex items-center gap-4 mb-3">
+          <div className="badge-container col-span-12 text-center items-center justify-center w-full">
+            <div className="flex w-full grid-cols-2 justify-center items-center gap-4 mb-3">
               <div className={getNeutralityBadgeClass()}>
                 {displayData.quickAssessment.overallNeutrality?.toUpperCase()}{" "}
                 NEUTRALITY
@@ -115,13 +115,13 @@ const SummmaryCard: React.FC<cardProps> = ({
           <div className="flex grid-cols-2 gap-4">
             <div className="text-center">
               <h4 className="summ-score">Neutrality</h4>
-              <p className="text-lg font-bold text-primary">
+              <p className="text-lg font-bold text-primary score-p">
                 {displayData.neutrality.toFixed(2)}
               </p>
             </div>
             <div className="text-center">
               <h4 className="summ-score">Persuasion</h4>
-              <p className="text-lg font-bold text-secondary">
+              <p className="text-lg font-bold text-secondary score-p">
                 {displayData.persuasion.toFixed(2)}
               </p>
             </div>
@@ -133,10 +133,10 @@ const SummmaryCard: React.FC<cardProps> = ({
         </div>
 
         {/* Sources count and quick insights */}
-        <div className="col-span-12 flex justify-between items-center text-sm text-base-content/70">
+        <div className="col-span-12 flex justify-between items-center text-sm text-base-content/70 gap-2">
           <span>Found {displayData.sourcesCount} sources</span>
           {displayData.biasAnalysis && (
-            <span className="text-info">
+            <span className="text-secondary">
               {displayData.biasAnalysis.confidenceLevel} confidence
             </span>
           )}
