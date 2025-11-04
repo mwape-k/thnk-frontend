@@ -15,6 +15,7 @@ import {
   CheckCircle2,
   Lightbulb,
 } from "lucide-react";
+import PixelBlast from "@/components/PixelBlast/PixelBlast";
 
 export default function BiasAnalysisPage() {
   const { state } = useLocation();

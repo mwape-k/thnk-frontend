@@ -8,6 +8,7 @@ import CustomBtn from "../components/CustomBtn";
 import type { EnhancedSearchResponse } from "../services/searchService";
 
 import "../styles/page-results.css";
+import PixelBlast from "@/components/PixelBlast/PixelBlast";
 
 //this page handles results from searchbar
 

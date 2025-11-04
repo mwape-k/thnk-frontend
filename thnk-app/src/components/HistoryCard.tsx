@@ -2,7 +2,7 @@ import "../components/component-styles/styles-historyCard.css";
 import Node from "../assets/node.svg";
 import { Eye, Trash } from "lucide-react";
 import type { SearchHistory } from "../interface/history";
-//import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 interface HistoryCardProps {
   history: SearchHistory;
@@ -18,7 +18,7 @@ function HistoryCard({
   isLoading = false,
 }: HistoryCardProps) {
   const { _id, query, timestamp, resultSummary } = history;
-  //const navigate = useNavigate();
+  const navigate = useNavigate();
 
   // Format date
   const formattedDate = new Date(timestamp).toLocaleDateString("en-US", {

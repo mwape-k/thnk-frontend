@@ -46,7 +46,7 @@ interface MindMapContainerProps {
   width?: number | "auto";
   height?: number | "auto";
   initialNodes?: MindMapNode[];
-  //parentLabel?: string;
+  parentLabel?: string;
   parentFill?: string;
   className?: string;
 }
@@ -57,12 +57,12 @@ const MindMapContainer: React.FC<MindMapContainerProps> = ({
   width = "auto",
   height = "auto",
   initialNodes,
-  //parentLabel,
+  parentLabel,
   parentFill,
   className = "",
 }) => {
-  //const navigate = useNavigate();
-  //const location = useLocation();
+  const navigate = useNavigate();
+  const location = useLocation();
   const containerRef = useRef<HTMLDivElement>(null);
 
   const [containerSize, setContainerSize] = useState({
