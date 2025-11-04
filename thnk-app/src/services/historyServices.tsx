@@ -7,7 +7,7 @@ import { API_CONFIG } from "../config/api";
 const API_BASE_URL = API_CONFIG;
 
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: `/api/${API_BASE_URL}`,
 });
 
 api.interceptors.request.use(
