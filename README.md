@@ -4,8 +4,8 @@
 ---
 
 
-# THNK
-
+<h1 align="center">THNK.</h1>
+<h4 align="center">Frontend Repo • <a href="https://github.com/mwape-k/thnk-backend">Backend Repo</a></h4>
 <details>
 <summary>📑 <strong>Table of Contents</strong> (Click to expand)</summary>
 
@@ -120,7 +120,9 @@ THNK transforms how users approach research by making bias analysis accessible, 
 *Demo video and screenshots will be added here*
 
 ### Application Interface Preview
-*Add your application screenshots demonstrating:*
+<img width="2340" height="1743" alt="Mock2" src="https://github.com/user-attachments/assets/376db37c-6b5a-4826-a2f7-420e04f6fcba" />
+<img width="2340" height="1743" alt="Movk1" src="https://github.com/user-attachments/assets/abaa4995-d782-496e-9b39-22409079fd30" />
+
 - Search interface with URL and prompt options
 - Mind map visualisation with node interactions
 - Popover cards with detailed bias analysis
