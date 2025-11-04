@@ -1,4 +1,3 @@
-import axios from "axios";
 import { API_CONFIG } from "../config/api";
 
 export interface PromptSearchRequest {
@@ -62,18 +61,14 @@ export interface EnhancedSearchResponse {
   };
 }
 
-const API_BASE_URL = API_CONFIG;
-
-const api = axios.create({
-  baseURL: API_BASE_URL,
-});
+const baseUrl: string = "http://localhost:5000/api";
 
 // Enhanced function for prompt search
 export const searchByPrompt = async (
   prompt: string
 ): Promise<SearchResponse> => {
   try {
-    const response = await fetch(`${api}/prompt`, {
+    const response = await fetch(`${baseUrl}/prompt`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -105,7 +100,7 @@ export const searchByPrompt = async (
 // Enhanced function for URL search
 export const searchByUrl = async (url: string): Promise<SearchResponse> => {
   try {
-    const response = await fetch(`${api}/deeper-scrape`, {
+    const response = await fetch(`${baseUrl}/deeper-scrape`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
