@@ -4,8 +4,6 @@ import Searchbar from "../components/Searchbar";
 import type { EnhancedSearchResponse } from "@/services/searchService";
 
 import "../styles/page-landing.css";
-import DitherBackground from "@/components/DitherBackground";
-import DarkVeil from "@/components/DarkVeil/DarkVeil";
 import PixelBlast from "@/components/PixelBlast/PixelBlast";
 
 function LandingPage() {

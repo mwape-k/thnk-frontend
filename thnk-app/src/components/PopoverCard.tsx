@@ -1,6 +1,6 @@
 import CustomBtn from "./CustomBtn";
 import "../components/component-styles/styles-popOver.css";
-import { ArrowUpRight, Expand, ExternalLink, X } from "lucide-react";
+import { ExternalLink, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface cardProps {
@@ -83,7 +83,7 @@ const PopoverCard: React.FC<PopoverCardProps> = ({
 
   // Use nodeData values or fallback to placeholder text
   const neutralityScore = nodeData?.neutralityScore?.toFixed(2) || "N/A";
-  const persuasionScore = nodeData?.persuasionScore?.toFixed(2) || "N/A";
+  //const persuasionScore = nodeData?.persuasionScore?.toFixed(2) || "N/A";
   const sentimentScore = nodeData?.sentimentScore?.toFixed(2) || "N/A";
 
   const summaryText = nodeData?.summary || "No summary available";

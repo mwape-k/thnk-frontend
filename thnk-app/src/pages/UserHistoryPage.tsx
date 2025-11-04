@@ -1,5 +1,5 @@
 // src/pages/UserHistoryPage.tsx
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import HistoryCard from "../components/HistoryCard";
@@ -8,7 +8,6 @@ import { Trash2, RefreshCw, AlertCircle } from "lucide-react";
 import type { SearchHistory } from "../interface/history";
 
 import "../styles/page-history.css";
-import PixelBlast from "@/components/PixelBlast/PixelBlast";
 
 function UserHistoryPage() {
   const [history, setHistory] = useState<SearchHistory[]>([]);

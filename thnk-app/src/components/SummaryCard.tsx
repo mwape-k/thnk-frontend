@@ -3,7 +3,7 @@ import { Maximize2 } from "lucide-react";
 import type { EnhancedSearchResponse } from "../services/searchService";
 
 interface cardProps {
-  onClick?: () => void;
+  //onClick?: () => void;
   className?: string;
   summaryText?: string;
   neutralityScore?: number;
@@ -15,7 +15,7 @@ interface cardProps {
 }
 
 const SummmaryCard: React.FC<cardProps> = ({
-  onClick,
+  //onClick,
   className = "",
   summaryText = "Lorem",
   neutralityScore = 0.3,
@@ -23,7 +23,7 @@ const SummmaryCard: React.FC<cardProps> = ({
   modalTitle = "Title",
   modalContent = "Text",
   searchData = null,
-  searchType = "prompt",
+  //searchType = "prompt",
 }) => {
   // Determine what to display based on search data and type
   const getDisplayData = () => {

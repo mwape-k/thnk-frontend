@@ -1,27 +1,14 @@
-interface LoadingProps {
-  title?: string;
-  isLoading?: boolean;
-}
+// interface LoadingProps {
+//   title?: string;
+//   isLoading?: boolean;
+// }
 
-const LoadingText: React.FC<LoadingProps> = ({
-  title = "Setting things up...",
-  isLoading = false,
-}) => {
-  const useEffect = () => {
-    if (isLoading) {
-      return (
-        <div className="w-full h-full flex justify-center items-center">
-          <h1>{title}</h1>
-        </div>
-      );
-    }
-  };
-
+function LoadingText() {
   return (
     <div className="w-full h-full">
-      <h1>{title}</h1>
+      <h1>Loading</h1>
     </div>
   );
-};
+}
 
 export default LoadingText;
