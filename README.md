@@ -83,9 +83,10 @@ THNK transforms how users approach research by making bias analysis accessible, 
    ```bash
    # Create .env file with:
    REACT_APP_API_URL=http://localhost:5000/api
-   REACT_APP_FIREBASE_CONFIG=your_firebase_config
    ```
-4. Start the development server:
+   *Ensure you have set up a firebase.js file with your own configuration for authentication*
+   
+5. Start the development server:
    ```bash
    npm start
    ```
