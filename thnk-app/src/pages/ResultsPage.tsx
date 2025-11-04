@@ -5,12 +5,17 @@ import Searchbar from "../components/Searchbar";
 import MindMapContainer from "../components/MindMapContainer";
 import { useState, useEffect } from "react";
 import CustomBtn from "../components/CustomBtn";
+import type { EnhancedSearchResponse } from "../services/searchService";
 
 import "../styles/page-results.css";
 
+//this page handles results from searchbar
+
 function ResultsPage() {
   const location = useLocation();
-  const [searchData, setSearchData] = useState(null);
+  const [searchData, setSearchData] = useState<EnhancedSearchResponse | null>(
+    null
+  );
   const [searchType, setSearchType] = useState<"url" | "prompt">("prompt");
 
   const navigate = useNavigate();
@@ -23,16 +28,33 @@ function ResultsPage() {
     }
   }, [location.state]);
 
-  const handleSearchComplete = (data: any, type: "prompt" | "url") => {
+  const handleSearchComplete = (
+    data: EnhancedSearchResponse,
+    type: "prompt" | "url"
+  ) => {
     console.log("Search completed:", data);
 
-    if (type === "url") {
-      console.log("Main content:", data.main);
-      console.log("AI Summary:", data.aiSummary);
-      console.log("Related sources:", data.relatedSources);
-    } else {
-      console.log("Summary:", data.summary);
-      console.log("Sources:", data.sources);
+    // Now both search types return the same enhanced structure
+    console.log("Summary:", data.summary);
+    console.log("Neutrality Score:", data.neutralityScore);
+    console.log("Persuasion Score:", data.persuasionScore);
+    console.log("Sources count:", data.sources?.length);
+
+    // Enhanced bias analysis data
+    if (data.biasAnalysis) {
+      console.log("Bias Analysis:", data.biasAnalysis.overallAssessment);
+      console.log(
+        "Critical Questions:",
+        data.biasAnalysis.criticalThinkingQuestions
+      );
+    }
+
+    if (data.sourceMetrics) {
+      console.log("Source Metrics:", data.sourceMetrics.neutralityRange);
+    }
+
+    if (data.quickAssessment) {
+      console.log("Quick Assessment:", data.quickAssessment.keyConsideration);
     }
 
     setSearchData(data);

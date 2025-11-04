@@ -1,5 +1,6 @@
 // src/pages/UserHistoryPage.tsx
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import HistoryCard from "../components/HistoryCard";
 import { historyService } from "../services/historyServices";
@@ -13,6 +14,7 @@ function UserHistoryPage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   // Fetch user history
   const fetchHistory = async (): Promise<void> => {
@@ -31,17 +33,57 @@ function UserHistoryPage() {
     }
   };
 
-  // Handle view full analysis
-  const handleViewAnalysis = async (historyId: string): Promise<void> => {
+  // Handle view full analysis - navigate to results page
+  const handleViewAnalysis = async (
+    historyId: string,
+    historyData: SearchHistory
+  ): Promise<void> => {
     try {
+      // Get the full search result data
       const fullResult = await historyService.getFullSearchResult(historyId);
-      // You can show this in a modal or navigate to a details page
-      console.log("Full analysis:", fullResult);
-      // For now, just alert with the summary
-      alert(`Full Analysis:\n\n${fullResult.summary}`);
+
+      if (fullResult) {
+        // Navigate to results page with the full search data
+        navigate("/Search-results", {
+          state: {
+            searchData: fullResult,
+            searchType: "prompt", // Assuming history searches are prompt-based
+            fromHistory: true, // Flag to indicate this came from history
+            historyId: historyId,
+          },
+        });
+      } else {
+        // Fallback: use the summary data from history
+        navigate("/Search-results", {
+          state: {
+            searchData: {
+              summary: historyData.resultSummary?.summary,
+              neutralityScore: historyData.resultSummary?.neutralityScore,
+              persuasionScore: historyData.resultSummary?.persuasionScore,
+              sources: [], // You might not have full sources in history summary
+            },
+            searchType: "prompt",
+            fromHistory: true,
+            historyId: historyId,
+          },
+        });
+      }
     } catch (err) {
-      alert("Failed to load full analysis");
-      console.error("Error fetching full analysis:", err);
+      console.error("Error loading full analysis:", err);
+      // Fallback with basic data
+      navigate("/Search-results", {
+        state: {
+          searchData: {
+            summary: historyData.resultSummary?.summary,
+            neutralityScore: historyData.resultSummary?.neutralityScore,
+            persuasionScore: historyData.resultSummary?.persuasionScore,
+            sources: [],
+          },
+          searchType: "prompt",
+          fromHistory: true,
+          historyId: historyId,
+        },
+      });
     }
   };
 

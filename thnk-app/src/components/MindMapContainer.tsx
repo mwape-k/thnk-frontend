@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import NodeMap from "./NodeMap";
 import PopoverCard from "./PopoverCard";
+import type { EnhancedSearchResponse } from "../services/searchService";
 
 const COLOURS = [
   "#DA88DA",
@@ -32,10 +33,15 @@ interface MindMapNode {
   sources?: string[];
   deeper?: MindMapNode[];
   type?: "source" | "aiOutline" | "relatedSource";
+  // Enhanced fields for bias analysis
+  biasAnalysis?: any;
+  sourceMetrics?: any;
+  researchQuality?: any;
+  quickAssessment?: any;
 }
 
 interface MindMapContainerProps {
-  responseData?: any;
+  responseData?: EnhancedSearchResponse | null;
   searchType?: "url" | "prompt";
   width?: number | "auto";
   height?: number | "auto";
@@ -201,79 +207,35 @@ const MindMapContainer: React.FC<MindMapContainerProps> = ({
 
   // Convert API response to mind map nodes with valid positions
   const convertResponseToNodes = useCallback(
-    (data: any, type: "url" | "prompt"): MindMapNode[] => {
+    (
+      data: EnhancedSearchResponse | null,
+      type: "url" | "prompt"
+    ): MindMapNode[] => {
       if (!data) return [];
 
       const nodes: MindMapNode[] = [];
 
-      if (type === "url") {
-        // Main content node
-        if (data.main) {
+      // Both search types now use the same enhanced structure
+      if (data.sources && Array.isArray(data.sources)) {
+        data.sources.forEach((source: any, index: number) => {
           nodes.push({
-            id: "main-content",
-            label: data.main.title || "Main Content",
-            fill: COLOURS[0],
+            id: `source-${index}`,
+            label: source.title || `Source ${index + 1}`,
+            fill: COLOURS[index % COLOURS.length],
             position: getValidPosition(nodes),
-            summary: data.main.text,
-            neutralityScore: data.main.neutralityScore,
-            sentimentScore: data.main.sentimentScore,
-            tags: data.main.tags,
-            url: data.main.url,
+            summary: source.text,
+            neutralityScore: source.neutralityScore,
+            sentimentScore: source.sentimentScore,
+            tags: source.tags,
+            url: source.url,
             type: "source",
+            // Pass enhanced data to each node for the popover
+            biasAnalysis: data.biasAnalysis,
+            sourceMetrics: data.sourceMetrics,
+            researchQuality: data.researchQuality,
+            quickAssessment: data.quickAssessment,
           });
-        }
-
-        // AI Outline nodes
-        if (data.main?.aiOutline && Array.isArray(data.main.aiOutline)) {
-          data.main.aiOutline.forEach((outline: any, index: number) => {
-            nodes.push({
-              id: `ai-outline-${index}`,
-              label: `Summary ${index + 1}`,
-              fill: COLOURS[(index % (COLOURS.length - 1)) + 1],
-              position: getValidPosition(nodes),
-              summary: outline.summary,
-              neutralityScore: outline.neutralityScore,
-              sources: outline.sources,
-              type: "aiOutline",
-            });
-          });
-        }
-
-        // Related sources
-        if (data.relatedSources && Array.isArray(data.relatedSources)) {
-          data.relatedSources.forEach((source: any, index: number) => {
-            nodes.push({
-              id: `related-source-${index}`,
-              label: source.title || `Source ${index + 1}`,
-              fill: COLOURS[(index + 2) % COLOURS.length],
-              position: getValidPosition(nodes),
-              summary: source.text,
-              neutralityScore: source.neutralityScore,
-              sentimentScore: source.sentimentScore,
-              tags: source.tags,
-              url: source.url,
-              type: "relatedSource",
-            });
-          });
-        }
-      } else {
-        // Prompt response structure
-        if (data.sources && Array.isArray(data.sources)) {
-          data.sources.forEach((source: any, index: number) => {
-            nodes.push({
-              id: `source-${index}`,
-              label: source.title || `Source ${index + 1}`,
-              fill: COLOURS[index % COLOURS.length],
-              position: getValidPosition(nodes),
-              summary: source.text,
-              neutralityScore: source.neutralityScore,
-              sentimentScore: source.sentimentScore,
-              tags: source.tags,
-              url: source.url,
-              type: "source",
-            });
-          });
-        }
+        });
       }
 
       return nodes;

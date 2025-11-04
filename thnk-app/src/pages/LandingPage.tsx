@@ -1,29 +1,55 @@
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Searchbar from "../components/Searchbar";
+import type { EnhancedSearchResponse } from "@/services/searchService";
 
 import "../styles/page-landing.css";
 
 function LandingPage() {
   const navigate = useNavigate();
 
-  const handleSearchComplete = (data: any, searchType: "prompt" | "url") => {
+  const handleSearchComplete = (
+    data: EnhancedSearchResponse,
+    searchType: "prompt" | "url"
+  ) => {
     console.log("Search completed:", data);
+    console.log("Search type:", searchType);
 
-    if (searchType === "url") {
-      console.log("Main content:", data.main);
-      console.log("AI Summary:", data.aiSummary);
-      console.log("Related sources:", data.relatedSources);
-    } else {
-      console.log("Summary:", data.summary);
-      console.log("Sources:", data.sources);
+    // Now both search types return the same enhanced structure
+    console.log("Summary:", data.summary);
+    console.log("Neutrality Score:", data.neutralityScore);
+    console.log("Persuasion Score:", data.persuasionScore);
+    console.log("Sources count:", data.sources?.length);
+
+    // Enhanced bias analysis data
+    if (data.biasAnalysis) {
+      console.log("Bias Analysis:", data.biasAnalysis.overallAssessment);
+      console.log(
+        "Critical Questions:",
+        data.biasAnalysis.criticalThinkingQuestions
+      );
     }
 
-    // Navigate to ResultsPage with search data
+    if (data.sourceMetrics) {
+      console.log("Source Metrics:", data.sourceMetrics.neutralityRange);
+    }
+
+    if (data.quickAssessment) {
+      console.log("Quick Assessment:", data.quickAssessment.keyConsideration);
+    }
+
+    // Navigate to ResultsPage with enhanced search data
     navigate("/Search-results", {
       state: {
         searchData: data,
         searchType: searchType,
+        // You can also pass specific enhanced data if needed
+        enhancedData: {
+          biasAnalysis: data.biasAnalysis,
+          sourceMetrics: data.sourceMetrics,
+          researchQuality: data.researchQuality,
+          quickAssessment: data.quickAssessment,
+        },
       },
     });
   };

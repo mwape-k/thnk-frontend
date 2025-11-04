@@ -2,10 +2,11 @@ import "../components/component-styles/styles-historyCard.css";
 import Node from "../assets/node.svg";
 import { Eye, Trash } from "lucide-react";
 import type { SearchHistory } from "../interface/history";
+import { useNavigate } from "react-router-dom";
 
 interface HistoryCardProps {
   history: SearchHistory;
-  onView: (historyId: string) => void;
+  onView: (historyId: string, historyData: SearchHistory) => void; // Updated to pass history data
   onDelete: (historyId: string) => void;
   isLoading?: boolean;
 }
@@ -17,6 +18,7 @@ function HistoryCard({
   isLoading = false,
 }: HistoryCardProps) {
   const { _id, query, timestamp, resultSummary } = history;
+  const navigate = useNavigate();
 
   // Format date
   const formattedDate = new Date(timestamp).toLocaleDateString("en-US", {
@@ -26,6 +28,10 @@ function HistoryCard({
     hour: "2-digit",
     minute: "2-digit",
   });
+
+  const handleViewClick = () => {
+    onView(_id, history); // Pass both ID and full history data
+  };
 
   if (isLoading) {
     return (
@@ -86,7 +92,7 @@ function HistoryCard({
               {resultSummary?.summary || "No summary available"}
             </p>
             <div className="mt-2 flex items-center text-sm text-gray-600">
-              <span className="bg-blue-100 text-slate-800 px-2 py-1 rounded text-xs">
+              <span className="badge badge-neutral text-amber-50 px-2 py-1 rounded text-xs font-bold">
                 {resultSummary?.sourcesCount || 0} sources
               </span>
             </div>
@@ -107,7 +113,7 @@ function HistoryCard({
           <div className="col">
             <button
               className="btn btn-tertiary hover:bg-blue-100 hover:text-blue-600 transition-colors"
-              onClick={() => onView(_id)}
+              onClick={handleViewClick}
               title="View full analysis"
             >
               <Eye size={18} />

@@ -9,14 +9,61 @@ export interface UrlSearchRequest {
 }
 
 export interface SearchResponse {
-  data: any;
+  data: EnhancedSearchResponse | null;
   success: boolean;
   message?: string;
 }
 
+// Enhanced interface for both prompt and URL responses
+export interface EnhancedSearchResponse {
+  summary: string;
+  neutralityScore: number;
+  persuasionScore: number;
+  sources: Array<{
+    url: string;
+    title: string;
+    text: string;
+    tags: string[];
+    neutralityScore: number;
+    sentimentScore: number;
+    aiGenerated: boolean;
+  }>;
+  // Enhanced bias analysis fields
+  biasAnalysis?: {
+    overallAssessment: string;
+    keyFindings: string[];
+    criticalThinkingQuestions: string[];
+    researchSuggestions: string[];
+    confidenceLevel: string;
+    biasIndicators: {
+      languagePatterns: string[];
+      perspectiveGaps: string[];
+      sourceDiversity: string;
+    };
+  };
+  sourceMetrics?: {
+    neutralityRange: { min: number; max: number; average: number };
+    sentimentRange: { min: number; max: number; average: number };
+    diversityScore: number;
+    scoreVariance: number;
+    balancedPerspectives: boolean;
+  };
+  researchQuality?: {
+    qualityScore: number;
+    factors: string[];
+    rating: string;
+  };
+  quickAssessment?: {
+    overallNeutrality: string;
+    perspectiveBalance: string;
+    researchQuality: string;
+    keyConsideration: string;
+  };
+}
+
 const baseUrl: string = "http://localhost:5000/api";
 
-// Separate function for prompt search
+// Enhanced function for prompt search
 export const searchByPrompt = async (
   prompt: string
 ): Promise<SearchResponse> => {
@@ -33,7 +80,7 @@ export const searchByPrompt = async (
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const data = await response.json();
+    const data: EnhancedSearchResponse = await response.json();
 
     return {
       data,
@@ -50,7 +97,7 @@ export const searchByPrompt = async (
   }
 };
 
-// Separate function for URL search
+// Enhanced function for URL search
 export const searchByUrl = async (url: string): Promise<SearchResponse> => {
   try {
     const response = await fetch(`${baseUrl}/deeper-scrape`, {
@@ -65,7 +112,7 @@ export const searchByUrl = async (url: string): Promise<SearchResponse> => {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const data = await response.json();
+    const data: EnhancedSearchResponse = await response.json();
 
     return {
       data,
@@ -80,4 +127,9 @@ export const searchByUrl = async (url: string): Promise<SearchResponse> => {
         error instanceof Error ? error.message : "An unknown error occurred",
     };
   }
+};
+
+// Optional: Type guard to check if response has enhanced data
+export const hasEnhancedData = (data: EnhancedSearchResponse): boolean => {
+  return !!(data.biasAnalysis && data.sourceMetrics && data.researchQuality);
 };
