@@ -61,7 +61,7 @@ export interface EnhancedSearchResponse {
   };
 }
 
-const baseUrl: string = "http://localhost:5000/api";
+const baseUrl: string = "https://thnk-backend-production.up.railway.app/api";
 
 // Enhanced function for prompt search
 export const searchByPrompt = async (
