@@ -206,7 +206,7 @@ Qualitative testing with 4 participants evaluated THNK's frontend functionality 
 
 ---
 
-## 📊 Summary
+## Summary
 
 **Strengths:** Exceptional visual design, intuitive navigation, valued bias analysis, engaging visualisation  
 **Opportunities:** Clearer interactive element discovery, enhanced visual relationships between nodes  
