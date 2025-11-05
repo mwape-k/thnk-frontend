@@ -118,7 +118,9 @@ THNK transforms how users approach research by making bias analysis accessible, 
 
 ## Demonstration
 
-*Demo video and screenshots will be added here*
+*View the app demo below:*
+
+[THNK. Demo](https://drive.google.com/file/d/1EzpZRXfwzaXOo0Y7OwAShu0_y7TZUr8L/view?usp=sharing)
 
 ### Application Interface Preview
 <img width="2340" height="1440" alt="M2" src="https://github.com/user-attachments/assets/5a64fa9b-b4dd-43d0-8b31-613c0f07af43" />
