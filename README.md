@@ -189,8 +189,8 @@ Built with ❤️ by: [Mwape Kurete](https://github.com/mwape-k)
 
 *While building THNK, I listened to these playlists:*
 
-[Focus & Productivity Playlist](https://open.spotify.com/playlist/your-playlist-link) — Deep work sessions  
-[Creative Coding Mix](https://open.spotify.com/playlist/your-playlist-link) — UI/UX design and development
+[I Shimmer Radio](https://open.spotify.com/playlist/37i9dQZF1E8McI8hdfZ7t8?si=e0378fa26e294ac9) — Deep backend dev work sessions  
+[BadBadNotGood Radio](https://open.spotify.com/playlist/37i9dQZF1E4y2Vk0sEsyrT?si=50b48f35539f4c37) — Frontend dev work sessions
 
 ## Acknowledgements 
 Special thanks to:
