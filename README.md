@@ -1,4 +1,4 @@
-<img width="1920" height="684" alt="PITCH BANNER" src="https://github.com/user-attachments/assets/bff51c97-5b09-4d5f-83be-930abfca2679" />
+<img width="1920" height="684" alt="PITCH BANNER-front" src="https://github.com/user-attachments/assets/1971e70a-4f33-4255-ab5f-431c50370516" />
 <h4 align="center">An AI-powered research tool for bias analysis and critical thinking</h4>
 
 ---
@@ -121,9 +121,10 @@ THNK transforms how users approach research by making bias analysis accessible, 
 *Demo video and screenshots will be added here*
 
 ### Application Interface Preview
-<img width="2340" height="1743" alt="Mock2" src="https://github.com/user-attachments/assets/376db37c-6b5a-4826-a2f7-420e04f6fcba" />
-<img width="2340" height="1743" alt="Movk1" src="https://github.com/user-attachments/assets/abaa4995-d782-496e-9b39-22409079fd30" />
+<img width="2340" height="1440" alt="M2" src="https://github.com/user-attachments/assets/5a64fa9b-b4dd-43d0-8b31-613c0f07af43" />
+<img width="2340" height="1440" alt="M1" src="https://github.com/user-attachments/assets/5e05607d-3912-4300-a006-e863848cbd52" />
 
+##### Application Interface Overview
 - Search interface with URL and prompt options
 - Mind map visualisation with node interactions
 - Popover cards with detailed bias analysis
