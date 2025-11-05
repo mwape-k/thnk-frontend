@@ -17,11 +17,12 @@
    ↳ 2.2 [How to Install](#22-how-to-install)  
 3. [**Features & Usage**](#features--usage)  
 4. [**Demonstration**](#demonstration)  
-5. [**Highlights & Challenges**](#highlights--challenges)  
-6. [**Roadmap & Future Implementations**](#roadmap--future-implementations)  
-7. [**Contributing & Licenses**](#contributing--licenses)  
-8. [**Authors & Contact Info**](#authors--contact-info)  
-9. [**Acknowledgements**](#acknowledgements)  
+5. [**Highlights & Challenges**](#highlights--challenges)
+6. [**User Testing**](#user-testing)
+7. [**Roadmap & Future Implementations**](#roadmap--future-implementations)  
+8. [**Contributing & Licenses**](#contributing--licenses)  
+9. [**Authors & Contact Info**](#authors--contact-info)  
+10. [**Acknowledgements**](#acknowledgements)  
 </details>
 
 ---
@@ -157,6 +158,59 @@ THNK transforms how users approach research by making bias analysis accessible, 
 | Performance Optimisation | Managing large-scale node rendering and real-time bias calculations efficiently |
 | User Experience Design | Creating intuitive interfaces for complex bias analysis concepts and metrics |
 | Backend-Frontend Integration | Seamless data synchronisation between AI processing and real-time frontend updates |
+
+## User Testing 
+#### Feedback
+
+Qualitative testing with 4 participants evaluated THNK's frontend functionality and user experience.
+
+##### First Impressions & Onboarding
+> *"Felt clean and modern with excellent spacing, typography and colour choices. The search bar was prominent and actions felt obvious."*  
+> *"Completely insane how gorgeous it is"*  
+> *"Immediately understandable – required no thinking or dissecting. Fun to interact with pins rather than text lists."*
+
+##### Search Experience
+> *"Smooth functionality. Clear prompt usage, though URL distinction could be emphasised more."*  
+> *"Incredibly easy with intuitive flow"*  
+> *"Both options offered convenience – prompts for specific questions, URLs for general expansion."*
+
+##### Results Visualisation
+> *"Engaging scatter-map helped visualise relationships and outliers – a neat move beyond lists."*  
+> *"Relationship implications became clear after use. Interactive orbiting might help initial understanding."*  
+> *"More breathable than endless scrolling in traditional AI interfaces."*
+
+##### Bias Analysis Features
+> *"Very valuable components for critical evaluation"*  
+> *"Incredibly helpful scores, especially neutrality vs sentiment differentiation"*  
+> *"Crucial for questioning internet information in the AI era"*
+
+##### Navigation & Interaction
+> *"Smooth movement between popovers, analysis and history with clean transitions"*  
+> *"Incredibly easy, no confusing moments"*  
+> *"Very easy, no confusions"*
+
+##### Visual Design & Clarity
+> *"Polished, modern design with excellent colour palette and spacing"*  
+> *"GORGEOUS. Minor contrast issues on pink elements fixable with font weights"*  
+> *"Beautiful and unique without being overpowering – immediately identifiable style"*
+
+##### Most Valuable Feature
+> *"Bias analysis and scatter map – turn complex data into visual, interactive insights"*  
+> *"Research summary incredibly useful for quick bias assessment and research kickstart"*  
+> *"Scatter map preferred over traditional information presentation"*
+
+##### Areas for Improvement
+> *"Clearer focal points and interactive element discovery"*  
+> *"More dynamic source interaction to match home page visuals"*  
+> *"Minor contrast adjustments for optimal accessibility"*
+
+---
+
+## 📊 Summary
+
+**Strengths:** Exceptional visual design, intuitive navigation, valued bias analysis, engaging visualisation  
+**Opportunities:** Clearer interactive element discovery, enhanced visual relationships between nodes  
+**Overall:** Users found THNK beautiful, intuitive and valuable for research, particularly praising its unique approach to bias analysis and information visualisation.
 
 ## Roadmap & Future Implementations
 
