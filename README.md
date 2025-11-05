@@ -68,7 +68,7 @@ THNK transforms how users approach research by making bias analysis accessible, 
 
 **Backend Setup:**
 
-[see backend repo here:](https://github.com/mwape-k/thnk-backend) for instalation instrutions
+[see backend repo here:](https://github.com/mwape-k/thnk-backend) for installation instrutions
 
 **Frontend Setup:**
 1. Navigate to frontend directory:
