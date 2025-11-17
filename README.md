@@ -31,7 +31,7 @@
 Empowering critical thinking through AI-powered bias analysis
 
 ### 1.1 Project Description 
-**THNK** is an interactive research tool that helps users analys.e information sources for bias, neutrality, and credibility. By leveraging AI-powered analysis, **THNK** provides comprehensive insights into the reliability of information and encourages deeper critical thinking about media consumption.
+**THNK** is an interactive research tool that helps users analyse information sources for bias, neutrality, and credibility. By leveraging AI-powered analysis, **THNK** provides comprehensive insights into the reliability of information and encourages deeper critical thinking about media consumption.
 
 Built with a modern tech stack focusing on real-time analysis and intuitive visualisation, THNK enables users to:
 
