@@ -1,6 +1,32 @@
 import "../components/component-styles/styles-summCard.css";
 import { Maximize2 } from "lucide-react";
-import type { EnhancedSearchResponse } from "../services/searchService";
+import ReactMarkdown from "react-markdown";
+
+// Define the normalized data interface that matches what ResultsPage sends
+interface NormalizedSearchData {
+  summary: string;
+  neutralityScore: number;
+  persuasionScore: number;
+  sources: Array<{
+    url: string;
+    title: string;
+    text: string;
+    tags: string[];
+    neutralityScore: number;
+    sentimentScore: number;
+    aiGenerated: boolean;
+    credibilityScore?: number;
+    domain?: string;
+    sourceType?: string;
+    verified?: boolean;
+    scrapedSuccessfully?: boolean;
+  }>;
+  biasAnalysis?: any;
+  sourceMetrics?: any;
+  researchQuality?: any;
+  quickAssessment?: any;
+  mainContent?: any;
+}
 
 interface cardProps {
   onClick?: () => void;
@@ -10,7 +36,7 @@ interface cardProps {
   persuasionScore?: number;
   modalTitle?: string;
   modalContent?: string;
-  searchData?: EnhancedSearchResponse | null; // Updated type
+  searchData?: NormalizedSearchData | null;
   searchType?: "url" | "prompt";
 }
 
@@ -25,11 +51,29 @@ const SummmaryCard: React.FC<cardProps> = ({
   searchData = null,
   searchType = "prompt",
 }) => {
+  console.log("SummaryCard received searchData:", searchData);
+  console.log("SummaryCard searchType:", searchType);
+
+  // Truncate summary for card display
+  const truncateSummary = (text: string, maxLength: number = 200): string => {
+    if (!text || text.length <= maxLength) return text;
+
+    // Find the last space within the maxLength to avoid cutting words
+    const truncated = text.substring(0, maxLength);
+    const lastSpace = truncated.lastIndexOf(" ");
+
+    return lastSpace > 0
+      ? truncated.substring(0, lastSpace) + "..."
+      : truncated + "...";
+  };
+
   // Determine what to display based on search data and type
   const getDisplayData = () => {
     if (!searchData) {
+      console.log("No searchData, using fallback values");
       return {
         summary: summaryText,
+        truncatedSummary: truncateSummary(summaryText),
         neutrality: neutralityScore,
         persuasion: persuasionScore,
         title: modalTitle,
@@ -37,16 +81,23 @@ const SummmaryCard: React.FC<cardProps> = ({
         // Enhanced data fallback
         quickAssessment: null,
         sourcesCount: 0,
+        biasAnalysis: null,
+        researchQuality: null,
       };
     }
 
-    // Both search types now use the same enhanced structure
+    console.log("Using searchData:", searchData);
+
+    // Both search types now use the same normalized structure
+    const fullSummary = searchData.summary || "No summary available";
+
     return {
-      summary: searchData.summary || "No summary available",
+      summary: fullSummary,
+      truncatedSummary: truncateSummary(fullSummary),
       neutrality: searchData.neutralityScore || 0.5,
       persuasion: searchData.persuasionScore || 0.5,
       title: "Research Summary",
-      content: searchData.summary || "No content available",
+      content: fullSummary, // Full summary for modal
       // Enhanced data
       quickAssessment: searchData.quickAssessment,
       sourcesCount: searchData.sources?.length || 0,
@@ -56,6 +107,9 @@ const SummmaryCard: React.FC<cardProps> = ({
   };
 
   const displayData = getDisplayData();
+
+  console.log("Display data:", displayData);
+  console.log("Sources count:", displayData.sourcesCount);
 
   // Get quality badge class based on neutrality
   const getNeutralityBadgeClass = () => {
@@ -129,7 +183,18 @@ const SummmaryCard: React.FC<cardProps> = ({
         </div>
 
         <div className="col-span-12">
-          <p className="summ-summary">{displayData.summary}</p>
+          {/* Truncated summary in card */}
+          <p className="summ-summary">
+            {displayData.truncatedSummary}
+            {displayData.truncatedSummary !== displayData.summary && (
+              <span
+                className="text-primary cursor-pointer ml-1 font-semibold"
+                onClick={() => document.getElementById("my_modal_6")?.click()}
+              >
+                Read more
+              </span>
+            )}
+          </p>
         </div>
 
         {/* Sources count and quick insights */}
@@ -152,48 +217,91 @@ const SummmaryCard: React.FC<cardProps> = ({
         aria-labelledby="modal-title"
         aria-describedby="modal-desc"
       >
-        <div className="modal-box max-w-4xl">
+        <div className="modal-box max-w-4xl max-h-[90vh] overflow-y-auto">
           <h3 id="modal-title" className="text-lg font-bold mb-4">
             {displayData.title}
           </h3>
 
-          {/* Enhanced modal content with bias analysis */}
+          {/* Enhanced modal content with markdown rendering */}
           <div className="space-y-4">
-            <p
-              id="modal-desc"
-              className="py-4 whitespace-pre-wrap border-b pb-4"
-            >
-              {displayData.content}
-            </p>
+            {/* Full summary with markdown rendering */}
+            <div className="border-b pb-4">
+              <h4 className="font-semibold mb-2 text-primary">Summary</h4>
+              <div className="prose prose-sm max-w-none">
+                <ReactMarkdown>{displayData.content}</ReactMarkdown>
+              </div>
+            </div>
 
             {/* Bias Analysis in Modal */}
             {displayData.biasAnalysis && (
               <div className="bg-base-200 p-4 rounded-lg">
                 <h4 className="font-semibold mb-2">Bias Analysis</h4>
-                <p className="text-sm mb-3">
-                  {displayData.biasAnalysis.overallAssessment}
-                </p>
+                <div className="prose prose-sm max-w-none">
+                  <ReactMarkdown>
+                    {typeof displayData.biasAnalysis === "string"
+                      ? displayData.biasAnalysis
+                      : displayData.biasAnalysis.overallAssessment ||
+                        "No bias analysis available"}
+                  </ReactMarkdown>
+                </div>
 
-                {displayData.biasAnalysis.keyFindings &&
+                {displayData.biasAnalysis &&
+                  typeof displayData.biasAnalysis !== "string" &&
+                  displayData.biasAnalysis.keyFindings &&
                   displayData.biasAnalysis.keyFindings.length > 0 && (
-                    <div className="mb-3">
+                    <div className="mt-3">
                       <h5 className="font-semibold text-sm mb-1">
                         Key Findings:
                       </h5>
-                      <ul className="text-sm list-disc list-inside">
+                      <ul className="text-sm list-disc list-inside space-y-1">
                         {displayData.biasAnalysis.keyFindings
                           .slice(0, 3)
                           .map((finding: string, index: number) => (
-                            <li key={index}>{finding}</li>
+                            <li key={index}>
+                              <ReactMarkdown>{finding}</ReactMarkdown>
+                            </li>
+                          ))}
+                      </ul>
+                    </div>
+                  )}
+
+                {/* Critical Thinking Questions */}
+                {displayData.biasAnalysis &&
+                  typeof displayData.biasAnalysis !== "string" &&
+                  displayData.biasAnalysis.criticalThinkingQuestions &&
+                  displayData.biasAnalysis.criticalThinkingQuestions.length >
+                    0 && (
+                    <div className="mt-3">
+                      <h5 className="font-semibold text-sm mb-1">
+                        Critical Questions:
+                      </h5>
+                      <ul className="text-sm list-disc list-inside space-y-1">
+                        {displayData.biasAnalysis.criticalThinkingQuestions
+                          .slice(0, 5) // Show more questions in modal
+                          .map((question: string, index: number) => (
+                            <li key={index}>
+                              <ReactMarkdown>{question}</ReactMarkdown>
+                            </li>
                           ))}
                       </ul>
                     </div>
                   )}
               </div>
             )}
+
+            {/* Source Metrics */}
+            {displayData.sourcesCount > 0 && (
+              <div className="bg-base-200 p-4 rounded-lg">
+                <h4 className="font-semibold mb-2">Source Analysis</h4>
+                <p className="text-sm">
+                  Analyzed {displayData.sourcesCount} sources with an average
+                  neutrality score of {displayData.neutrality.toFixed(2)}
+                </p>
+              </div>
+            )}
           </div>
 
-          <div className="modal-action">
+          <div className="modal-action sticky bottom-0 bg-base-100 pt-4 border-t">
             <label htmlFor="my_modal_6" className="btn cursor-pointer">
               Close
             </label>

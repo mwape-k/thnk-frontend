@@ -2,7 +2,6 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import NodeMap from "./NodeMap";
 import PopoverCard from "./PopoverCard";
-import type { EnhancedSearchResponse } from "../services/searchService";
 
 const COLOURS = [
   "#DA88DA",
@@ -40,8 +39,34 @@ interface MindMapNode {
   quickAssessment?: any;
 }
 
+// Define the normalized data interface that matches what ResultsPage sends
+interface NormalizedSearchData {
+  summary: string;
+  neutralityScore: number;
+  persuasionScore: number;
+  sources: Array<{
+    url: string;
+    title: string;
+    text: string;
+    tags: string[];
+    neutralityScore: number;
+    sentimentScore: number;
+    aiGenerated: boolean;
+    credibilityScore?: number;
+    domain?: string;
+    sourceType?: string;
+    verified?: boolean;
+    scrapedSuccessfully?: boolean;
+  }>;
+  biasAnalysis?: any;
+  sourceMetrics?: any;
+  researchQuality?: any;
+  quickAssessment?: any;
+  mainContent?: any;
+}
+
 interface MindMapContainerProps {
-  responseData?: EnhancedSearchResponse | null;
+  responseData?: NormalizedSearchData | null;
   searchType?: "url" | "prompt";
   width?: number | "auto";
   height?: number | "auto";
@@ -205,20 +230,33 @@ const MindMapContainer: React.FC<MindMapContainerProps> = ({
     [actualWidth, actualHeight, isWithinBounds, nodesOverlap]
   );
 
-  // Convert API response to mind map nodes with valid positions
+  // Convert normalized data to mind map nodes with valid positions
   const convertResponseToNodes = useCallback(
     (
-      data: EnhancedSearchResponse | null,
+      data: NormalizedSearchData | null,
       type: "url" | "prompt"
     ): MindMapNode[] => {
-      if (!data) return [];
+      if (!data) {
+        console.log("No data provided to convertResponseToNodes");
+        return [];
+      }
+
+      console.log("Converting data to nodes:", data);
+      console.log("Sources array:", data.sources);
+      console.log("Sources count:", data.sources?.length);
 
       const nodes: MindMapNode[] = [];
 
-      // Both search types now use the same enhanced structure
-      if (data.sources && Array.isArray(data.sources)) {
+      // Create nodes from sources
+      if (
+        data.sources &&
+        Array.isArray(data.sources) &&
+        data.sources.length > 0
+      ) {
+        console.log("Creating nodes from sources");
+
         data.sources.forEach((source: any, index: number) => {
-          nodes.push({
+          const node: MindMapNode = {
             id: `source-${index}`,
             label: source.title || `Source ${index + 1}`,
             fill: COLOURS[index % COLOURS.length],
@@ -234,10 +272,16 @@ const MindMapContainer: React.FC<MindMapContainerProps> = ({
             sourceMetrics: data.sourceMetrics,
             researchQuality: data.researchQuality,
             quickAssessment: data.quickAssessment,
-          });
+          };
+
+          console.log(`Created node ${index}:`, node);
+          nodes.push(node);
         });
+      } else {
+        console.log("No sources found in data");
       }
 
+      console.log("Final nodes array:", nodes);
       return nodes;
     },
     [getValidPosition]
@@ -245,7 +289,12 @@ const MindMapContainer: React.FC<MindMapContainerProps> = ({
 
   // On mount or responseData change, convert API response to nodes
   useEffect(() => {
+    console.log("MindMapContainer useEffect triggered");
+    console.log("ResponseData:", responseData);
+    console.log("SearchType:", searchType);
+
     if (initialNodes && initialNodes.length > 0) {
+      console.log("Using initialNodes:", initialNodes);
       // Ensure initial nodes have valid positions
       const nodesWithValidPositions: MindMapNode[] = [];
       initialNodes.forEach((node) => {
@@ -268,11 +317,14 @@ const MindMapContainer: React.FC<MindMapContainerProps> = ({
     }
 
     if (responseData) {
+      console.log("Converting responseData to nodes");
       const convertedNodes = convertResponseToNodes(responseData, searchType);
+      console.log("Converted nodes:", convertedNodes);
       setNodes(convertedNodes);
       setPopoverNode(null);
     } else {
       // If no response data, set empty nodes to clear previous state
+      console.log("No responseData, clearing nodes");
       setNodes([]);
     }
   }, [

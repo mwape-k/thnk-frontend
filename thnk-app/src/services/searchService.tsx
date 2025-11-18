@@ -9,12 +9,12 @@ export interface UrlSearchRequest {
 }
 
 export interface SearchResponse {
-  data: EnhancedSearchResponse | null;
+  data: EnhancedSearchResponse | UrlSearchResponse | null;
   success: boolean;
   message?: string;
 }
 
-// Enhanced interface for both prompt and URL responses
+// Interface for PROMPT responses (matches your /prompt endpoint)
 export interface EnhancedSearchResponse {
   summary: string;
   neutralityScore: number;
@@ -59,6 +59,35 @@ export interface EnhancedSearchResponse {
     researchQuality: string;
     keyConsideration: string;
   };
+}
+
+// Interface for URL responses (matches your /deeper-scrape endpoint)
+export interface UrlSearchResponse {
+  quickAssessment: any;
+  main: {
+    url: string;
+    title: string;
+    text: string;
+    contentLength: number;
+    scrapedAt: string;
+  };
+  aiSummary: string; // Note: different field name!
+  neutralityScore: number;
+  persuasionScore: number;
+  relatedSources: Array<{
+    // Note: different field name!
+    url: string;
+    title: string;
+    text: string;
+    tags: string[];
+    neutralityScore: number;
+    sentimentScore: number;
+    aiGenerated: boolean;
+  }>;
+  biasAnalysis?: any; // Could be string or object based on your logs
+  researchQuality?: any;
+  sourceMetrics?: any;
+  analyzedAt: string;
 }
 
 const baseUrl: string = "https://thnk-backend-production.up.railway.app/api";
@@ -112,7 +141,7 @@ export const searchByUrl = async (url: string): Promise<SearchResponse> => {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const data: EnhancedSearchResponse = await response.json();
+    const data: UrlSearchResponse = await response.json();
 
     return {
       data,
@@ -129,7 +158,56 @@ export const searchByUrl = async (url: string): Promise<SearchResponse> => {
   }
 };
 
-// Optional: Type guard to check if response has enhanced data
-export const hasEnhancedData = (data: EnhancedSearchResponse): boolean => {
-  return !!(data.biasAnalysis && data.sourceMetrics && data.researchQuality);
+// Type guards to check response types
+export const isPromptResponse = (data: any): data is EnhancedSearchResponse => {
+  return (
+    data && typeof data.summary === "string" && Array.isArray(data.sources)
+  );
+};
+
+export const isUrlResponse = (data: any): data is UrlSearchResponse => {
+  return (
+    data &&
+    data.main &&
+    typeof data.aiSummary === "string" &&
+    Array.isArray(data.relatedSources)
+  );
+};
+
+// Helper function to normalize data for UI
+export const normalizeSearchData = (
+  data: EnhancedSearchResponse | UrlSearchResponse | null
+) => {
+  if (!data) return null;
+
+  console.log("Raw data for normalization:", data);
+
+  if (isPromptResponse(data)) {
+    return {
+      summary: data.summary,
+      neutralityScore: data.neutralityScore,
+      persuasionScore: data.persuasionScore,
+      sources: data.sources || [],
+      biasAnalysis: data.biasAnalysis,
+      sourceMetrics: data.sourceMetrics,
+      researchQuality: data.researchQuality,
+      quickAssessment: data.quickAssessment,
+    };
+  }
+
+  if (isUrlResponse(data)) {
+    return {
+      summary: data.aiSummary, // Map aiSummary to summary
+      neutralityScore: data.neutralityScore,
+      persuasionScore: data.persuasionScore,
+      sources: data.relatedSources || [], // Map relatedSources to sources
+      biasAnalysis: data.biasAnalysis,
+      sourceMetrics: data.sourceMetrics,
+      researchQuality: data.researchQuality,
+      quickAssessment: data.quickAssessment,
+      mainContent: data.main,
+    };
+  }
+
+  return null;
 };

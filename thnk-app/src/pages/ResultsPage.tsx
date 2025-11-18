@@ -5,16 +5,45 @@ import Searchbar from "../components/Searchbar";
 import MindMapContainer from "../components/MindMapContainer";
 import { useState, useEffect } from "react";
 import CustomBtn from "../components/CustomBtn";
-import type { EnhancedSearchResponse } from "../services/searchService";
+import {
+  normalizeSearchData,
+  type EnhancedSearchResponse,
+  type UrlSearchResponse,
+} from "../services/searchService";
 
 import "../styles/page-results.css";
-import PixelBlast from "@/components/PixelBlast/PixelBlast";
+
+// Define a normalized interface that works for both prompt and URL responses
+interface NormalizedSearchData {
+  summary: string;
+  neutralityScore: number;
+  persuasionScore: number;
+  sources: Array<{
+    url: string;
+    title: string;
+    text: string;
+    tags: string[];
+    neutralityScore: number;
+    sentimentScore: number;
+    aiGenerated: boolean;
+    credibilityScore?: number;
+    domain?: string;
+    sourceType?: string;
+    verified?: boolean;
+    scrapedSuccessfully?: boolean;
+  }>;
+  biasAnalysis?: any;
+  sourceMetrics?: any;
+  researchQuality?: any;
+  quickAssessment?: any;
+  mainContent?: any; // For URL responses
+}
 
 //this page handles results from searchbar
 
 function ResultsPage() {
   const location = useLocation();
-  const [searchData, setSearchData] = useState<EnhancedSearchResponse | null>(
+  const [searchData, setSearchData] = useState<NormalizedSearchData | null>(
     null
   );
   const [searchType, setSearchType] = useState<"url" | "prompt">("prompt");
@@ -24,42 +53,67 @@ function ResultsPage() {
   // Get initial data from navigation state
   useEffect(() => {
     if (location.state?.searchData) {
-      setSearchData(location.state.searchData);
-      setSearchType(location.state.searchType || "prompt");
+      console.log("Location state data:", location.state.searchData);
+
+      // Normalize the data from location state
+      const normalizedData = normalizeSearchData(location.state.searchData);
+      console.log("Normalized location state data:", normalizedData);
+
+      if (normalizedData) {
+        setSearchData(normalizedData);
+        setSearchType(location.state.searchType || "prompt");
+      }
     }
   }, [location.state]);
 
   const handleSearchComplete = (
-    data: EnhancedSearchResponse,
+    data: EnhancedSearchResponse | UrlSearchResponse,
     type: "prompt" | "url"
   ) => {
-    console.log("Search completed:", data);
+    console.log("Raw search completed:", data);
 
-    // Now both search types return the same enhanced structure
-    console.log("Summary:", data.summary);
-    console.log("Neutrality Score:", data.neutralityScore);
-    console.log("Persuasion Score:", data.persuasionScore);
-    console.log("Sources count:", data.sources?.length);
+    // Normalize the data for consistent handling
+    const normalizedData = normalizeSearchData(data);
+    console.log("Normalized search data:", normalizedData);
 
-    // Enhanced bias analysis data
-    if (data.biasAnalysis) {
-      console.log("Bias Analysis:", data.biasAnalysis.overallAssessment);
-      console.log(
-        "Critical Questions:",
-        data.biasAnalysis.criticalThinkingQuestions
-      );
+    if (normalizedData) {
+      console.log("Summary:", normalizedData.summary);
+      console.log("Neutrality Score:", normalizedData.neutralityScore);
+      console.log("Persuasion Score:", normalizedData.persuasionScore);
+      console.log("Sources count:", normalizedData.sources.length);
+
+      // Enhanced bias analysis data
+      if (normalizedData.biasAnalysis) {
+        console.log(
+          "Bias Analysis:",
+          normalizedData.biasAnalysis.overallAssessment ||
+            normalizedData.biasAnalysis
+        );
+        console.log(
+          "Critical Questions:",
+          normalizedData.biasAnalysis.criticalThinkingQuestions
+        );
+      }
+
+      if (normalizedData.sourceMetrics) {
+        console.log(
+          "Source Metrics:",
+          normalizedData.sourceMetrics.neutralityRange
+        );
+      }
+
+      if (normalizedData.quickAssessment) {
+        console.log(
+          "Quick Assessment:",
+          normalizedData.quickAssessment.keyConsideration
+        );
+      }
+
+      setSearchData(normalizedData);
+      setSearchType(type);
+    } else {
+      console.error("Failed to normalize search data");
     }
-
-    if (data.sourceMetrics) {
-      console.log("Source Metrics:", data.sourceMetrics.neutralityRange);
-    }
-
-    if (data.quickAssessment) {
-      console.log("Quick Assessment:", data.quickAssessment.keyConsideration);
-    }
-
-    setSearchData(data);
-    setSearchType(type);
   };
 
   const handleSearchError = (error: string) => {

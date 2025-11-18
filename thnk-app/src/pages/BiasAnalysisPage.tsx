@@ -2,31 +2,75 @@ import { useNavigate, useLocation } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import CustomBtn from "../components/CustomBtn";
 import "../styles/page-seek-deeper.css";
-import type {
-  ReactElement,
-  JSXElementConstructor,
-  ReactNode,
-  ReactPortal,
-  Key,
-} from "react";
+import ReactMarkdown from "react-markdown";
 import {
   AlertCircle,
   AlertTriangle,
   CheckCircle2,
   Lightbulb,
 } from "lucide-react";
-import PixelBlast from "@/components/PixelBlast/PixelBlast";
+
+// Define the enhanced data interfaces
+interface BiasAnalysisData {
+  overallAssessment?: string;
+  keyFindings?: string[];
+  criticalThinkingQuestions?: string[];
+  researchSuggestions?: string[];
+  confidenceLevel?: string;
+  biasIndicators?: {
+    languagePatterns?: string[];
+    perspectiveGaps?: string[];
+    sourceDiversity?: string;
+  };
+}
+
+interface SourceMetricsData {
+  neutralityRange?: { min: number; max: number; average: number };
+  sentimentRange?: { min: number; max: number; average: number };
+  credibilityRange?: { min: number; max: number; average: number };
+  diversityScore?: number;
+  scoreVariance?: number;
+  balancedPerspectives?: boolean;
+}
+
+interface ResearchQualityData {
+  qualityScore?: number;
+  factors?: string[];
+  rating?: string;
+}
+
+interface QuickAssessmentData {
+  overallNeutrality?: string;
+  perspectiveBalance?: string;
+  researchQuality?: string;
+  sourceCredibility?: string;
+  keyConsideration?: string;
+}
+
+interface NodeData {
+  label?: string;
+  summary?: string;
+  neutralityScore?: number;
+  persuasionScore?: number;
+  sentimentScore?: number;
+  tags?: string[];
+  url?: string;
+  biasAnalysis?: BiasAnalysisData | string;
+  sourceMetrics?: SourceMetricsData;
+  researchQuality?: ResearchQualityData;
+  quickAssessment?: QuickAssessmentData;
+}
 
 export default function BiasAnalysisPage() {
   const { state } = useLocation();
   const navigate = useNavigate();
 
-  // Extract enhanced data from navigation state
-  const nodeData = state?.nodeData || {};
-  const biasAnalysis = state?.biasAnalysis || {};
-  const sourceMetrics = state?.sourceMetrics || {};
-  const researchQuality = state?.researchQuality || {};
-  const quickAssessment = state?.quickAssessment || {};
+  // Extract enhanced data from navigation state with proper typing
+  const nodeData: NodeData = state?.nodeData || {};
+  const biasAnalysis: BiasAnalysisData | string = state?.biasAnalysis || {};
+  const sourceMetrics: SourceMetricsData = state?.sourceMetrics || {};
+  const researchQuality: ResearchQualityData = state?.researchQuality || {};
+  const quickAssessment: QuickAssessmentData = state?.quickAssessment || {};
 
   const handleRedirect = () => {
     navigate(-1);
@@ -38,9 +82,30 @@ export default function BiasAnalysisPage() {
     }
   };
 
+  // Helper function to get bias analysis text
+  const getBiasAnalysisText = (): string => {
+    if (!biasAnalysis) return "No bias analysis available";
+
+    if (typeof biasAnalysis === "string") {
+      return biasAnalysis;
+    }
+
+    return biasAnalysis.overallAssessment || "No bias analysis available";
+  };
+
+  // Helper function to get bias analysis object
+  const getBiasAnalysisObject = (): BiasAnalysisData => {
+    if (typeof biasAnalysis === "string") {
+      return {
+        overallAssessment: biasAnalysis,
+      };
+    }
+    return biasAnalysis;
+  };
+
   // DaisyUI badge classes
-  const getQualityBadge = (rating: string) => {
-    switch (rating) {
+  const getQualityBadge = (rating: string = "medium") => {
+    switch (rating.toLowerCase()) {
       case "high":
         return "badge badge-success";
       case "medium":
@@ -52,16 +117,30 @@ export default function BiasAnalysisPage() {
     }
   };
 
-  const getNeutralityBadge = (neutrality: string) => {
-    switch (neutrality) {
+  const getNeutralityBadge = (neutrality: string = "medium") => {
+    switch (neutrality.toLowerCase()) {
       case "high":
         return "badge badge-success badge-lg";
       case "moderate":
+      case "medium":
         return "badge badge-warning badge-lg";
       case "low":
         return "badge badge-error badge-lg";
       default:
         return "badge badge-ghost badge-lg";
+    }
+  };
+
+  const getConfidenceBadge = (confidence: string = "medium") => {
+    switch (confidence.toLowerCase()) {
+      case "high":
+        return "badge badge-success";
+      case "medium":
+        return "badge badge-warning";
+      case "low":
+        return "badge badge-error";
+      default:
+        return "badge badge-ghost";
     }
   };
 
@@ -96,8 +175,41 @@ export default function BiasAnalysisPage() {
           )}
         </div>
 
+        {/* Source Information */}
+        {nodeData.label && (
+          <div className="card info-card shadow-xl mb-6">
+            <div className="card-body">
+              <h2 className="card-cust-title card-title text-2xl">
+                Source Information
+              </h2>
+              <div className="space-y-3">
+                <div>
+                  <h3 className="font-semibold">Title</h3>
+                  <p className="text-base-content/80">{nodeData.label}</p>
+                </div>
+                {nodeData.url && (
+                  <div>
+                    <h3 className="font-semibold">URL</h3>
+                    <p className="text-base-content/80 break-all">
+                      {nodeData.url}
+                    </p>
+                  </div>
+                )}
+                {nodeData.summary && (
+                  <div>
+                    <h3 className="font-semibold">Summary</h3>
+                    <div className="prose prose-sm max-w-none">
+                      <ReactMarkdown>{nodeData.summary}</ReactMarkdown>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Quick Assessment Summary */}
-        {quickAssessment && (
+        {(quickAssessment || nodeData.quickAssessment) && (
           <div className="card info-card shadow-xl mb-6">
             <div className="card-body">
               <h2 className="card-cust-title card-title text-2xl">
@@ -109,10 +221,15 @@ export default function BiasAnalysisPage() {
                   <div className="stat-title">Overall Neutrality</div>
                   <div
                     className={getNeutralityBadge(
-                      quickAssessment.overallNeutrality
+                      quickAssessment.overallNeutrality ||
+                        nodeData.quickAssessment?.overallNeutrality
                     )}
                   >
-                    {quickAssessment.overallNeutrality?.toUpperCase()}
+                    {(
+                      quickAssessment.overallNeutrality ||
+                      nodeData.quickAssessment?.overallNeutrality ||
+                      "MEDIUM"
+                    ).toUpperCase()}
                   </div>
                 </div>
 
@@ -120,107 +237,105 @@ export default function BiasAnalysisPage() {
                   <div className="stat-title">Perspective Balance</div>
                   <div
                     className={`badge badge-lg ${
-                      quickAssessment.perspectiveBalance === "balanced"
+                      (quickAssessment.perspectiveBalance ||
+                        nodeData.quickAssessment?.perspectiveBalance) ===
+                      "balanced"
                         ? "badge-success"
                         : "badge-warning"
                     }`}
                   >
-                    {quickAssessment.perspectiveBalance?.toUpperCase()}
+                    {(
+                      quickAssessment.perspectiveBalance ||
+                      nodeData.quickAssessment?.perspectiveBalance ||
+                      "BALANCED"
+                    ).toUpperCase()}
                   </div>
                 </div>
 
                 <div className="stat place-items-center">
                   <div className="stat-title">Research Quality</div>
                   <div
-                    className={getQualityBadge(quickAssessment.researchQuality)}
+                    className={getQualityBadge(
+                      quickAssessment.researchQuality ||
+                        nodeData.quickAssessment?.researchQuality
+                    )}
                   >
-                    {quickAssessment.researchQuality?.toUpperCase()}
+                    {(
+                      quickAssessment.researchQuality ||
+                      nodeData.quickAssessment?.researchQuality ||
+                      "MEDIUM"
+                    ).toUpperCase()}
                   </div>
                 </div>
 
                 <div className="stat place-items-center">
                   <div className="stat-title">Neutrality Score</div>
                   <div className="stat-value text-primary">
-                    {nodeData.neutralityScore?.toFixed(2)}
+                    {nodeData.neutralityScore?.toFixed(2) || "0.50"}
                   </div>
                 </div>
               </div>
 
-              <div className="alert alert-info mt-4">
-                <AlertCircle />
-                <span>{quickAssessment.keyConsideration}</span>
-              </div>
+              {(quickAssessment.keyConsideration ||
+                nodeData.quickAssessment?.keyConsideration) && (
+                <div className="alert alert-info mt-4">
+                  <AlertCircle />
+                  <span>
+                    {quickAssessment.keyConsideration ||
+                      nodeData.quickAssessment?.keyConsideration}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         )}
 
         {/* Bias Analysis Section */}
-        {biasAnalysis && (
+        {(biasAnalysis || nodeData.biasAnalysis) && (
           <div className="card info-card shadow-xl mb-6">
             <div className="card-body">
-              <h2 className="card-cust-title card-title text-2xl">
-                Bias Analysis
-              </h2>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="card-cust-title card-title text-2xl">
+                  Bias Analysis
+                </h2>
+                {getBiasAnalysisObject().confidenceLevel && (
+                  <div
+                    className={getConfidenceBadge(
+                      getBiasAnalysisObject().confidenceLevel
+                    )}
+                  >
+                    {getBiasAnalysisObject().confidenceLevel?.toUpperCase()}{" "}
+                    CONFIDENCE
+                  </div>
+                )}
+              </div>
 
               <div className="space-y-6">
                 {/* Overall Assessment */}
                 <div>
                   <h3 className="text-lg mb-3">Overall Assessment</h3>
-                  <p className="text-base-content/80 leading-relaxed">
-                    {biasAnalysis.overallAssessment}
-                  </p>
+                  <div className="prose prose-lg max-w-none text-base-content/80 leading-relaxed">
+                    <ReactMarkdown>{getBiasAnalysisText()}</ReactMarkdown>
+                  </div>
                 </div>
 
                 {/* Key Findings */}
-                {biasAnalysis.keyFindings &&
-                  biasAnalysis.keyFindings.length > 0 && (
+                {getBiasAnalysisObject().keyFindings &&
+                  getBiasAnalysisObject().keyFindings!.length > 0 && (
                     <div>
                       <h3 className="text-lg mb-3">Key Findings</h3>
                       <ul className="space-y-2">
-                        {biasAnalysis.keyFindings.map(
-                          (
-                            finding:
-                              | string
-                              | number
-                              | bigint
-                              | boolean
-                              | ReactElement<
-                                  unknown,
-                                  string | JSXElementConstructor<any>
-                                >
-                              | Iterable<ReactNode>
-                              | ReactPortal
-                              | Promise<
-                                  | string
-                                  | number
-                                  | bigint
-                                  | boolean
-                                  | ReactPortal
-                                  | ReactElement<
-                                      unknown,
-                                      string | JSXElementConstructor<any>
-                                    >
-                                  | Iterable<ReactNode>
-                                  | null
-                                  | undefined
-                                >
-                              | null
-                              | undefined,
-                            index: Key | null | undefined
-                          ) => (
+                        {getBiasAnalysisObject().keyFindings!.map(
+                          (finding, index) => (
                             <li
                               key={index}
-                              className="flex items-start gap-2 pb-8 items-center "
+                              className="flex items-start gap-2 pb-4 items-center"
                             >
-                              <div className="badge badge-primary badge-sm p-0 mt-0 w-9 h-9 flex items-center">
-                                <CheckCircle2
-                                  size={54}
-                                  strokeWidth={2}
-                                  className="m-1.5"
-                                />
+                              <div className="badge badge-primary badge-sm p-0 mt-0 w-6 h-6 flex items-center justify-center flex-shrink-0">
+                                <CheckCircle2 size={16} strokeWidth={2} />
                               </div>
                               <span className="text-base-content/80">
-                                {finding}
+                                <ReactMarkdown>{finding}</ReactMarkdown>
                               </span>
                             </li>
                           )
@@ -230,51 +345,21 @@ export default function BiasAnalysisPage() {
                   )}
 
                 {/* Critical Thinking Questions */}
-                {biasAnalysis.criticalThinkingQuestions &&
-                  biasAnalysis.criticalThinkingQuestions.length > 0 && (
+                {getBiasAnalysisObject().criticalThinkingQuestions &&
+                  getBiasAnalysisObject().criticalThinkingQuestions!.length >
+                    0 && (
                     <div>
                       <h3 className="text-lg mb-3">
                         Critical Thinking Questions
                       </h3>
                       <div className="space-y-3">
-                        {biasAnalysis.criticalThinkingQuestions.map(
-                          (
-                            question:
-                              | string
-                              | number
-                              | bigint
-                              | boolean
-                              | ReactElement<
-                                  unknown,
-                                  string | JSXElementConstructor<any>
-                                >
-                              | Iterable<ReactNode>
-                              | ReactPortal
-                              | Promise<
-                                  | string
-                                  | number
-                                  | bigint
-                                  | boolean
-                                  | ReactPortal
-                                  | ReactElement<
-                                      unknown,
-                                      string | JSXElementConstructor<any>
-                                    >
-                                  | Iterable<ReactNode>
-                                  | null
-                                  | undefined
-                                >
-                              | null
-                              | undefined,
-                            index: Key | null | undefined
-                          ) => (
+                        {getBiasAnalysisObject().criticalThinkingQuestions!.map(
+                          (question, index) => (
                             <div key={index} className="alert alert-warning">
-                              <AlertTriangle
-                                size={26}
-                                strokeWidth={2}
-                                className="m-1.5"
-                              />
-                              <span className="question-text">{question}</span>
+                              <AlertTriangle size={20} strokeWidth={2} />
+                              <span className="question-text">
+                                <ReactMarkdown>{question}</ReactMarkdown>
+                              </span>
                             </div>
                           )
                         )}
@@ -283,51 +368,22 @@ export default function BiasAnalysisPage() {
                   )}
 
                 {/* Research Suggestions */}
-                {biasAnalysis.researchSuggestions &&
-                  biasAnalysis.researchSuggestions.length > 0 && (
+                {getBiasAnalysisObject().researchSuggestions &&
+                  getBiasAnalysisObject().researchSuggestions!.length > 0 && (
                     <div>
                       <h3 className="text-lg mb-3">Research Suggestions</h3>
                       <div className="space-y-2">
-                        {biasAnalysis.researchSuggestions.map(
-                          (
-                            suggestion:
-                              | string
-                              | number
-                              | bigint
-                              | boolean
-                              | ReactElement<
-                                  unknown,
-                                  string | JSXElementConstructor<any>
-                                >
-                              | Iterable<ReactNode>
-                              | ReactPortal
-                              | Promise<
-                                  | string
-                                  | number
-                                  | bigint
-                                  | boolean
-                                  | ReactPortal
-                                  | ReactElement<
-                                      unknown,
-                                      string | JSXElementConstructor<any>
-                                    >
-                                  | Iterable<ReactNode>
-                                  | null
-                                  | undefined
-                                >
-                              | null
-                              | undefined,
-                            index: Key | null | undefined
-                          ) => (
+                        {getBiasAnalysisObject().researchSuggestions!.map(
+                          (suggestion, index) => (
                             <div
                               key={index}
-                              className="flex items-start gap-4 pb-5"
+                              className="flex items-start gap-3 pb-3"
                             >
-                              <div className="badge badge-accent badge-sm mt-0 w-10 h-10">
-                                <Lightbulb />
+                              <div className="badge badge-accent badge-sm mt-1 w-6 h-6 flex items-center justify-center flex-shrink-0">
+                                <Lightbulb size={14} />
                               </div>
-                              <span className="text-base-content/90 font-bold">
-                                {suggestion}
+                              <span className="text-base-content/90">
+                                <ReactMarkdown>{suggestion}</ReactMarkdown>
                               </span>
                             </div>
                           )
@@ -335,13 +391,56 @@ export default function BiasAnalysisPage() {
                       </div>
                     </div>
                   )}
+
+                {/* Bias Indicators */}
+                {getBiasAnalysisObject().biasIndicators && (
+                  <div>
+                    <h3 className="text-lg mb-3">Bias Indicators</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {getBiasAnalysisObject().biasIndicators!
+                        .languagePatterns &&
+                        getBiasAnalysisObject().biasIndicators!
+                          .languagePatterns!.length > 0 && (
+                          <div>
+                            <h4 className="font-semibold mb-2">
+                              Language Patterns
+                            </h4>
+                            <ul className="list-disc list-inside space-y-1 text-sm">
+                              {getBiasAnalysisObject()
+                                .biasIndicators!.languagePatterns!.slice(0, 3)
+                                .map((pattern, index) => (
+                                  <li key={index}>{pattern}</li>
+                                ))}
+                            </ul>
+                          </div>
+                        )}
+                      {getBiasAnalysisObject().biasIndicators!
+                        .perspectiveGaps &&
+                        getBiasAnalysisObject().biasIndicators!.perspectiveGaps!
+                          .length > 0 && (
+                          <div>
+                            <h4 className="font-semibold mb-2">
+                              Perspective Gaps
+                            </h4>
+                            <ul className="list-disc list-inside space-y-1 text-sm">
+                              {getBiasAnalysisObject()
+                                .biasIndicators!.perspectiveGaps!.slice(0, 3)
+                                .map((gap, index) => (
+                                  <li key={index}>{gap}</li>
+                                ))}
+                            </ul>
+                          </div>
+                        )}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
         )}
 
         {/* Source Metrics */}
-        {sourceMetrics && (
+        {(sourceMetrics || nodeData.sourceMetrics) && (
           <div className="card info-card shadow-xl mb-6">
             <div className="card-body">
               <h2 className="card-cust-title card-title text-2xl">
@@ -355,20 +454,38 @@ export default function BiasAnalysisPage() {
                     <div className="flex justify-between">
                       <span>Average:</span>
                       <span className="font-semibold text-primary">
-                        {sourceMetrics.neutralityRange?.average?.toFixed(2)}
+                        {(
+                          sourceMetrics.neutralityRange?.average ||
+                          nodeData.sourceMetrics?.neutralityRange?.average ||
+                          0.5
+                        ).toFixed(2)}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span>Range:</span>
                       <span className="font-semibold">
-                        {sourceMetrics.neutralityRange?.min?.toFixed(2)} -{" "}
-                        {sourceMetrics.neutralityRange?.max?.toFixed(2)}
+                        {(
+                          sourceMetrics.neutralityRange?.min ||
+                          nodeData.sourceMetrics?.neutralityRange?.min ||
+                          0
+                        ).toFixed(2)}{" "}
+                        -{" "}
+                        {(
+                          sourceMetrics.neutralityRange?.max ||
+                          nodeData.sourceMetrics?.neutralityRange?.max ||
+                          1
+                        ).toFixed(2)}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span>Diversity Score:</span>
                       <span className="font-semibold text-secondary">
-                        {(sourceMetrics.diversityScore * 100).toFixed(0)}%
+                        {(
+                          (sourceMetrics.diversityScore ||
+                            nodeData.sourceMetrics?.diversityScore ||
+                            0) * 100
+                        ).toFixed(0)}
+                        %
                       </span>
                     </div>
                   </div>
@@ -378,12 +495,14 @@ export default function BiasAnalysisPage() {
                   <h3 className="text-lg">Perspective Analysis</h3>
                   <div
                     className={`alert ${
-                      sourceMetrics.balancedPerspectives
+                      sourceMetrics.balancedPerspectives ||
+                      nodeData.sourceMetrics?.balancedPerspectives
                         ? "alert-success"
                         : "alert-warning"
                     }`}
                   >
-                    {sourceMetrics.balancedPerspectives ? (
+                    {sourceMetrics.balancedPerspectives ||
+                    nodeData.sourceMetrics?.balancedPerspectives ? (
                       <>
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -426,7 +545,7 @@ export default function BiasAnalysisPage() {
         )}
 
         {/* Research Quality */}
-        {researchQuality && (
+        {(researchQuality || nodeData.researchQuality) && (
           <div className="card info-card shadow-xl">
             <div className="card-body">
               <h2 className="card-cust-title card-title text-2xl">
@@ -439,56 +558,43 @@ export default function BiasAnalysisPage() {
                     Overall Quality Score
                   </p>
                   <p className="text-4xl text-primary">
-                    {(researchQuality.qualityScore * 100).toFixed(0)}%
+                    {(
+                      (researchQuality.qualityScore ||
+                        nodeData.researchQuality?.qualityScore ||
+                        0.5) * 100
+                    ).toFixed(0)}
+                    %
                   </p>
-                  <div className={getQualityBadge(researchQuality.rating)}>
-                    {researchQuality.rating?.toUpperCase()} QUALITY
+                  <div
+                    className={getQualityBadge(
+                      researchQuality.rating || nodeData.researchQuality?.rating
+                    )}
+                  >
+                    {(
+                      researchQuality.rating ||
+                      nodeData.researchQuality?.rating ||
+                      "MEDIUM"
+                    ).toUpperCase()}{" "}
+                    QUALITY
                   </div>
                 </div>
               </div>
 
-              {researchQuality.factors &&
-                researchQuality.factors.length > 0 && (
+              {(researchQuality.factors || nodeData.researchQuality?.factors) &&
+                (researchQuality.factors || nodeData.researchQuality?.factors)!
+                  .length > 0 && (
                   <div>
                     <h3 className="text-lg mb-3">Quality Factors</h3>
                     <div className="space-y-2">
-                      {researchQuality.factors.map(
-                        (
-                          factor:
-                            | string
-                            | number
-                            | bigint
-                            | boolean
-                            | ReactElement<
-                                unknown,
-                                string | JSXElementConstructor<any>
-                              >
-                            | Iterable<ReactNode>
-                            | ReactPortal
-                            | Promise<
-                                | string
-                                | number
-                                | bigint
-                                | boolean
-                                | ReactPortal
-                                | ReactElement<
-                                    unknown,
-                                    string | JSXElementConstructor<any>
-                                  >
-                                | Iterable<ReactNode>
-                                | null
-                                | undefined
-                              >
-                            | null
-                            | undefined,
-                          index: Key | null | undefined
-                        ) => (
+                      {(researchQuality.factors ||
+                        nodeData.researchQuality?.factors)!.map(
+                        (factor, index) => (
                           <div key={index} className="flex items-center gap-3">
                             <div className="badge badge-sm badge-primary">
                               +
                             </div>
                             <span className="text-base-content/80">
-                              {factor}
+                              <ReactMarkdown>{factor}</ReactMarkdown>
                             </span>
                           </div>
                         )

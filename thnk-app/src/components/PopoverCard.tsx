@@ -2,11 +2,28 @@ import CustomBtn from "./CustomBtn";
 import "../components/component-styles/styles-popOver.css";
 import { ArrowUpRight, Expand, ExternalLink, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
 
 interface cardProps {
   onClick?: () => void;
   className?: string;
   onClose: () => void;
+}
+
+// Define the normalized source interface
+interface NormalizedSource {
+  url: string;
+  title: string;
+  text: string;
+  tags: string[];
+  neutralityScore: number;
+  sentimentScore: number;
+  aiGenerated: boolean;
+  credibilityScore?: number;
+  domain?: string;
+  sourceType?: string;
+  verified?: boolean;
+  scrapedSuccessfully?: boolean;
 }
 
 interface PopoverCardProps extends cardProps {
@@ -18,38 +35,42 @@ interface PopoverCardProps extends cardProps {
     sentimentScore?: number;
     tags?: string[];
     url?: string;
-    sources?: any[];
+    sources?: NormalizedSource[];
     type?: string;
-    // Enhanced fields from backend
-    biasAnalysis?: {
-      overallAssessment: string;
-      keyFindings: string[];
-      criticalThinkingQuestions: string[];
-      researchSuggestions: string[];
-      confidenceLevel: string;
-      biasIndicators: {
-        languagePatterns: string[];
-        perspectiveGaps: string[];
-        sourceDiversity: string;
-      };
-    };
+    // Enhanced fields from backend - now properly typed
+    biasAnalysis?:
+      | {
+          overallAssessment?: string;
+          keyFindings?: string[];
+          criticalThinkingQuestions?: string[];
+          researchSuggestions?: string[];
+          confidenceLevel?: string;
+          biasIndicators?: {
+            languagePatterns?: string[];
+            perspectiveGaps?: string[];
+            sourceDiversity?: string;
+          };
+        }
+      | string; // Can be object or string
     sourceMetrics?: {
-      neutralityRange: { min: number; max: number; average: number };
-      sentimentRange: { min: number; max: number; average: number };
-      diversityScore: number;
-      scoreVariance: number;
-      balancedPerspectives: boolean;
+      neutralityRange?: { min: number; max: number; average: number };
+      sentimentRange?: { min: number; max: number; average: number };
+      credibilityRange?: { min: number; max: number; average: number };
+      diversityScore?: number;
+      scoreVariance?: number;
+      balancedPerspectives?: boolean;
     };
     researchQuality?: {
-      qualityScore: number;
-      factors: string[];
-      rating: string;
+      qualityScore?: number;
+      factors?: string[];
+      rating?: string;
     };
     quickAssessment?: {
-      overallNeutrality: string;
-      perspectiveBalance: string;
-      researchQuality: string;
-      keyConsideration: string;
+      overallNeutrality?: string;
+      perspectiveBalance?: string;
+      researchQuality?: string;
+      sourceCredibility?: string;
+      keyConsideration?: string;
     };
   };
 }
@@ -86,15 +107,86 @@ const PopoverCard: React.FC<PopoverCardProps> = ({
   const persuasionScore = nodeData?.persuasionScore?.toFixed(2) || "N/A";
   const sentimentScore = nodeData?.sentimentScore?.toFixed(2) || "N/A";
 
-  const summaryText = nodeData?.summary || "No summary available";
+  // Truncate summary for popover display
+  const truncateSummary = (text: string, maxLength: number = 150): string => {
+    if (!text || text.length <= maxLength) return text;
 
-  // Quick assessment indicators
-  const hasEnhancedData = nodeData?.biasAnalysis && nodeData?.quickAssessment;
+    const truncated = text.substring(0, maxLength);
+    const lastSpace = truncated.lastIndexOf(" ");
+
+    return lastSpace > 0
+      ? truncated.substring(0, lastSpace) + "..."
+      : truncated + "...";
+  };
+
+  const summaryText = nodeData?.summary
+    ? truncateSummary(nodeData.summary)
+    : "No summary available";
+
+  // Check if we have enhanced data
+  const hasEnhancedData =
+    nodeData?.biasAnalysis ||
+    nodeData?.quickAssessment ||
+    nodeData?.researchQuality;
+
+  // Get bias analysis text (handles both string and object formats)
+  const getBiasAnalysisText = (): string => {
+    if (!nodeData?.biasAnalysis) return "";
+
+    if (typeof nodeData.biasAnalysis === "string") {
+      return nodeData.biasAnalysis;
+    }
+
+    return (
+      nodeData.biasAnalysis.overallAssessment || "No bias analysis available"
+    );
+  };
+
+  // Get confidence level
+  const getConfidenceLevel = (): string => {
+    if (!nodeData?.biasAnalysis) return "";
+
+    if (typeof nodeData.biasAnalysis === "string") {
+      return "medium";
+    }
+
+    return nodeData.biasAnalysis.confidenceLevel || "medium";
+  };
 
   // DaisyUI badge classes based on neutrality
   const getNeutralityBadgeClass = () => {
     const neutrality = nodeData.quickAssessment?.overallNeutrality;
     switch (neutrality) {
+      case "high":
+        return "badge badge-success";
+      case "moderate":
+        return "badge badge-warning";
+      case "low":
+        return "badge badge-error";
+      default:
+        return "badge badge-ghost";
+    }
+  };
+
+  // Get research quality badge class
+  const getResearchQualityBadgeClass = () => {
+    const quality = nodeData.researchQuality?.rating;
+    switch (quality) {
+      case "high":
+        return "badge badge-success";
+      case "medium":
+        return "badge badge-warning";
+      case "low":
+        return "badge badge-error";
+      default:
+        return "badge badge-ghost";
+    }
+  };
+
+  // Get source credibility badge class
+  const getSourceCredibilityBadgeClass = () => {
+    const credibility = nodeData.quickAssessment?.sourceCredibility;
+    switch (credibility) {
       case "high":
         return "badge badge-success";
       case "moderate":
@@ -134,16 +226,33 @@ const PopoverCard: React.FC<PopoverCardProps> = ({
           </div>
         </div>
 
-        {/* Enhanced Quick Assessment Badge */}
+        {/* Enhanced Quick Assessment Badges */}
         {hasEnhancedData && (
           <div className="col-span-12 text-center items-center mb-2">
-            <div className={getNeutralityBadgeClass()}>
-              {nodeData.quickAssessment?.overallNeutrality?.toUpperCase()}{" "}
-              NEUTRALITY
+            <div className="flex flex-wrap justify-center gap-2 mb-2">
+              {nodeData.quickAssessment?.overallNeutrality && (
+                <div className={getNeutralityBadgeClass()}>
+                  {nodeData.quickAssessment.overallNeutrality.toUpperCase()}{" "}
+                  NEUTRALITY
+                </div>
+              )}
+              {nodeData.researchQuality?.rating && (
+                <div className={getResearchQualityBadgeClass()}>
+                  {nodeData.researchQuality.rating.toUpperCase()} QUALITY
+                </div>
+              )}
+              {nodeData.quickAssessment?.sourceCredibility && (
+                <div className={getSourceCredibilityBadgeClass()}>
+                  {nodeData.quickAssessment.sourceCredibility.toUpperCase()}{" "}
+                  CREDIBILITY
+                </div>
+              )}
             </div>
-            <p className="text-sm text-base-content/70 mt-1">
-              {nodeData.quickAssessment?.keyConsideration}
-            </p>
+            {nodeData.quickAssessment?.keyConsideration && (
+              <p className="text-sm text-base-content/70 mt-1">
+                {nodeData.quickAssessment.keyConsideration}
+              </p>
+            )}
           </div>
         )}
 
@@ -154,6 +263,12 @@ const PopoverCard: React.FC<PopoverCardProps> = ({
               <h4>Neutrality</h4>
               <p className="text-lg font-bold text-primary">
                 {neutralityScore}
+              </p>
+            </div>
+            <div className="text-center pop-score ">
+              <h4>Persuasion</h4>
+              <p className="text-lg font-bold text-secondary">
+                {persuasionScore}
               </p>
             </div>
             {nodeData?.sentimentScore !== undefined && (
@@ -170,6 +285,14 @@ const PopoverCard: React.FC<PopoverCardProps> = ({
         {/* Summary */}
         <div className="col-span-12">
           <p className="pop-summary text-base-content">{summaryText}</p>
+          {nodeData?.summary && nodeData.summary.length > 150 && (
+            <button
+              className="text-primary text-sm font-semibold mt-1 hover:underline"
+              onClick={handleDeeperAnalysis}
+            >
+              Read full analysis
+            </button>
+          )}
         </div>
 
         {/* Tags */}
@@ -184,7 +307,19 @@ const PopoverCard: React.FC<PopoverCardProps> = ({
                   {tag}
                 </div>
               ))}
+              {nodeData.tags.length > 5 && (
+                <div className="badge badge-ghost badge-sm">
+                  +{nodeData.tags.length - 5} more
+                </div>
+              )}
             </div>
+          </div>
+        )}
+
+        {/* Source Info */}
+        {nodeData?.url && (
+          <div className="col-span-12 text-xs text-base-content/60">
+            <p className="truncate">Source: {new URL(nodeData.url).hostname}</p>
           </div>
         )}
 
@@ -192,7 +327,7 @@ const PopoverCard: React.FC<PopoverCardProps> = ({
         <div className="col-span-12">
           <CustomBtn
             onClick={handleDeeperAnalysis}
-            text={hasEnhancedData ? "VIEW BIAS ANALYSIS" : "THNK. deeper"}
+            text={hasEnhancedData ? "VIEW FULL ANALYSIS" : "THNK. DEEPER"}
             className="pop-btn btn-primary w-full"
             size="auto"
           />
@@ -200,13 +335,56 @@ const PopoverCard: React.FC<PopoverCardProps> = ({
 
         {/* Quick Bias Insights Preview */}
         {hasEnhancedData && nodeData.biasAnalysis && (
-          <div className="quick-in col-span-12 mt-2 p-3 bg-info/10 rounded-lg border border-info/20">
-            <h5 className="text-amber-50 text-sm mb-1">Quick Insights:</h5>
-            <p className="text-xs text-amber-50 ">
-              {nodeData.biasAnalysis.overallAssessment}
-            </p>
+          <div className="quick-in col-span-12 mt-2 p-3 bg-base-200 rounded-lg border border-base-300">
+            <h5 className="text-sm font-semibold mb-1 flex items-center gap-2">
+              <span>Quick Insights</span>
+              {nodeData.biasAnalysis && (
+                <span
+                  className={`badge badge-xs font-bold ${
+                    getConfidenceLevel() === "high"
+                      ? "badge-success"
+                      : getConfidenceLevel() === "medium"
+                      ? "badge-warning"
+                      : "badge-error"
+                  }`}
+                >
+                  {getConfidenceLevel()} confidence
+                </span>
+              )}
+            </h5>
+            <div className="text-xs text-base-content prose prose-sm max-w-none">
+              <ReactMarkdown>{getBiasAnalysisText()}</ReactMarkdown>
+            </div>
+
+            {/* Show first critical question if available */}
+            {nodeData.biasAnalysis &&
+              typeof nodeData.biasAnalysis === "object" &&
+              nodeData.biasAnalysis.criticalThinkingQuestions &&
+              nodeData.biasAnalysis.criticalThinkingQuestions.length > 0 && (
+                <div className="mt-2 pt-2 border-t border-base-300">
+                  <p className="text-xs font-semibold mb-1">Consider:</p>
+                  <p className="text-xs italic">
+                    "{nodeData.biasAnalysis.criticalThinkingQuestions[0]}"
+                  </p>
+                </div>
+              )}
           </div>
         )}
+
+        {/* Research Quality Factors */}
+        {nodeData?.researchQuality?.factors &&
+          nodeData.researchQuality.factors.length > 0 && (
+            <div className="col-span-12 text-xs">
+              <p className="font-semibold mb-1">Quality Factors:</p>
+              <ul className="list-disc list-inside space-y-1">
+                {nodeData.researchQuality.factors
+                  .slice(0, 3)
+                  .map((factor, index) => (
+                    <li key={index}>{factor}</li>
+                  ))}
+              </ul>
+            </div>
+          )}
       </div>
     </div>
   );

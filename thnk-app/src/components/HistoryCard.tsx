@@ -29,6 +29,13 @@ function HistoryCard({
     minute: "2-digit",
   });
 
+  // Truncate resultSummary to 150 characters with ellipsis
+  const truncatedSummary = resultSummary?.summary
+    ? resultSummary.summary.length > 150
+      ? `${resultSummary.summary.substring(0, 150)}...`
+      : resultSummary.summary
+    : "No summary available";
+
   const handleViewClick = () => {
     onView(_id, history); // Pass both ID and full history data
   };
@@ -88,8 +95,8 @@ function HistoryCard({
             </p>
           </div>
           <div className="col-span-8">
-            <p className="node-summary">
-              {resultSummary?.summary || "No summary available"}
+            <p className="node-summary" title={resultSummary?.summary}>
+              {truncatedSummary}
             </p>
             <div className="mt-2 flex items-center text-sm text-gray-600">
               <span className="badge badge-neutral text-amber-50 px-2 py-1 rounded text-xs font-bold">
