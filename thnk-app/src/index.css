@@ -76,3 +76,11 @@ div {
   font-weight: 200;
   font-style: normal;
 }
+
+.badge {
+  font-weight: bolder;
+}
+
+.question-text {
+  font-weight: bolder;
+}
